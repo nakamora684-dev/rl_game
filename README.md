@@ -39,8 +39,5 @@ uv run pytest
 - `uv run python test.py`      – evaluate RL vs baseline → results/*.csv
 - `uv run jupyter lab`         – open evaluate.ipynb
 
-## Structure
-See project plan, section 10.
-
 ## Machine specs
 (fill in: CPU, GPU, RAM, OS, Python version)

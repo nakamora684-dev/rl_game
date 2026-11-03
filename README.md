@@ -38,6 +38,3 @@ uv run pytest
 - `uv run python train.py`     – train PPO (headless)
 - `uv run python test.py`      – evaluate RL vs baseline → results/*.csv
 - `uv run jupyter lab`         – open evaluate.ipynb
-
-## Machine specs
-(fill in: CPU, GPU, RAM, OS, Python version)

@@ -30,7 +30,7 @@ MATCH_SECONDS = 60                                # durée d'un match simulé
 MAX_PHYSICS_TICKS = MATCH_SECONDS * PHYSICS_HZ    # = 3600
 MAX_DECISIONS = MAX_PHYSICS_TICKS // FRAMES_PER_DECISION  # = 600 pas max par épisode
 
-# [A?] Bornes de normalisation. Le Member A fixera les vraies valeurs ;
+############### [A?] Bornes de normalisation. Le Member A fixera les vraies valeurs ;
 # on s'en sert seulement pour ramener les vitesses dans [-1, 1].
 MAX_PLAYER_SPEED = 200.0   # unités/seconde (placeholder)
 MAX_BALL_SPEED = 600.0     # unités/seconde (placeholder)
@@ -51,6 +51,8 @@ ACTION_NAMES = ("move_x", "move_y", "effort", "kick_trigger", "kick_power")
 ACTION_DIM = len(ACTION_NAMES)  # = 5
 
 # DÉCISION DE DESIGN : le tir est déclenché si trigger > 0.5 (soit brut > 0).
+
+#####################################[A??????]
 # Le tir n'a d'effet que si le joueur contrôle le ballon (à confirmer avec A).
 KICK_THRESHOLD = 0.5
 
@@ -128,6 +130,9 @@ def _f(group: str, names: list[str], low: float, high: float) -> list[ObsFeature
 
 
 # L'ORDRE ci-dessous EST le contrat avec le Member D (ne pas le changer sans prévenir).
+"""OBS_FEATURES est la définition officielle de l’observation, c’est-à-dire la liste de ce que l’agent 
+voit à chaque décision. Chaque fiche décrit un nombre du vecteur d’observation : son nom, sa plage de valeurs et son groupe"""
+#Exemple, la fiche n° 6 dit : « self_stamina, entre 0 et 1, groupe self
 OBS_FEATURES: tuple[ObsFeature, ...] = tuple(
     # --- Joueur contrôlé (position absolue, repère attaque->+x) ---------------
     _f("self", ["self_x", "self_y"], -1.0, 1.0)             # (pos - centre) / demi-terrain

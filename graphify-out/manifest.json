@@ -1,0 +1,212 @@
+{
+  ".github/workflows/ci.yml": {
+    "mtime": 1793731552.8892038,
+    "seen": 1794054390.6860847,
+    "ast_hash": "5f17311b7b19b4385e77e7f0787ae387",
+    "semantic_hash": "5f17311b7b19b4385e77e7f0787ae387"
+  },
+  "agents/__init__.py": {
+    "mtime": 1793731552.892091,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "environment/__init__.py": {
+    "mtime": 1793731552.892091,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "game/__init__.py": {
+    "mtime": 1793731552.892091,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "game/__main__.py": {
+    "mtime": 1793913025.8174584,
+    "seen": 1794054390.6860847,
+    "ast_hash": "0e4729c1a35955776bfe40c0dd3576dc",
+    "semantic_hash": "0e4729c1a35955776bfe40c0dd3576dc"
+  },
+  "game/actions.py": {
+    "mtime": 1793835146.7752984,
+    "seen": 1794054390.6860847,
+    "ast_hash": "c8734916d6b34632f0524d2d74deebe2",
+    "semantic_hash": "c8734916d6b34632f0524d2d74deebe2"
+  },
+  "game/ball.py": {
+    "mtime": 1793912801.8791394,
+    "seen": 1794054390.6860847,
+    "ast_hash": "6d33da0fde4ee6f318a35b3f096e95a0",
+    "semantic_hash": "6d33da0fde4ee6f318a35b3f096e95a0"
+  },
+  "game/config.py": {
+    "mtime": 1793912801.8778808,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d883878f9c5abfed9ffc8ade9c2f04b5",
+    "semantic_hash": "d883878f9c5abfed9ffc8ade9c2f04b5"
+  },
+  "game/player.py": {
+    "mtime": 1793893750.9250767,
+    "seen": 1794054390.6860847,
+    "ast_hash": "2c051d9ffa6def385cc482b9e1d81383",
+    "semantic_hash": "2c051d9ffa6def385cc482b9e1d81383"
+  },
+  "game/simulation.py": {
+    "mtime": 1793912801.8851142,
+    "seen": 1794054390.6860847,
+    "ast_hash": "576e48681e19021bacfdbf5868740ed9",
+    "semantic_hash": "576e48681e19021bacfdbf5868740ed9"
+  },
+  "game/stamina.py": {
+    "mtime": 1793893750.9189937,
+    "seen": 1794054390.6860847,
+    "ast_hash": "f36c1e5009108e714f6141429a923bc5",
+    "semantic_hash": "f36c1e5009108e714f6141429a923bc5"
+  },
+  "observe.py": {
+    "mtime": 1793731552.8990624,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "play.py": {
+    "mtime": 1793731552.8990624,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "pyproject.toml": {
+    "mtime": 1793912495.1338818,
+    "seen": 1794054390.6860847,
+    "ast_hash": "75c33b4323297eaf34c0ac8908c47ddc",
+    "semantic_hash": "75c33b4323297eaf34c0ac8908c47ddc"
+  },
+  "rendering/__init__.py": {
+    "mtime": 1793731552.9019117,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "test.py": {
+    "mtime": 1793731552.9036186,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "tests/test_ball.py": {
+    "mtime": 1793912860.1962323,
+    "seen": 1794054390.6860847,
+    "ast_hash": "f3d4af6c16cbe15be968f66ff51c18ae",
+    "semantic_hash": "f3d4af6c16cbe15be968f66ff51c18ae"
+  },
+  "tests/test_demo.py": {
+    "mtime": 1793912860.1988146,
+    "seen": 1794054390.6860847,
+    "ast_hash": "c547a2be7d51d71c8ba465305de95568",
+    "semantic_hash": "c547a2be7d51d71c8ba465305de95568"
+  },
+  "tests/test_player_controls.py": {
+    "mtime": 1793893844.4420109,
+    "seen": 1794054390.6860847,
+    "ast_hash": "ef58e0bd986d28a04b47d3de749366d6",
+    "semantic_hash": "ef58e0bd986d28a04b47d3de749366d6"
+  },
+  "tests/test_player_motion.py": {
+    "mtime": 1793835322.5285366,
+    "seen": 1794054390.6860847,
+    "ast_hash": "bf61c898b568eac4860cec8d1b74dd1f",
+    "semantic_hash": "bf61c898b568eac4860cec8d1b74dd1f"
+  },
+  "tests/test_simulation.py": {
+    "mtime": 1793894042.5431437,
+    "seen": 1794054390.6860847,
+    "ast_hash": "e8e3278c272fd412565c7d6d54428013",
+    "semantic_hash": "e8e3278c272fd412565c7d6d54428013"
+  },
+  "tests/test_smoke.py": {
+    "mtime": 1793835322.530075,
+    "seen": 1794054390.6860847,
+    "ast_hash": "727fe483e1f76abefbcbc633b045df6d",
+    "semantic_hash": "727fe483e1f76abefbcbc633b045df6d"
+  },
+  "tests/test_stamina.py": {
+    "mtime": 1793894117.9975028,
+    "seen": 1794054390.6860847,
+    "ast_hash": "f3d20d85c04800803c26f6b9919e2ab7",
+    "semantic_hash": "f3d20d85c04800803c26f6b9919e2ab7"
+  },
+  "train.py": {
+    "mtime": 1793731552.9036186,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  ".gitignore": {
+    "mtime": 1793913025.8174584,
+    "seen": 1794054390.6860847,
+    "ast_hash": "edd713b82c717732bb8af3d80e16a044",
+    "semantic_hash": "edd713b82c717732bb8af3d80e16a044"
+  },
+  ".python-version": {
+    "mtime": 1793835006.9813032,
+    "seen": 1794054390.6860847,
+    "ast_hash": "33cc10613bb12360280f703cb78cd6c0",
+    "semantic_hash": "33cc10613bb12360280f703cb78cd6c0"
+  },
+  "AGENTS.md": {
+    "mtime": 1793912860.208741,
+    "seen": 1794054390.6860847,
+    "ast_hash": "c6bf68896ece19d12c1a68c741823cbd",
+    "semantic_hash": "c6bf68896ece19d12c1a68c741823cbd"
+  },
+  "README.md": {
+    "mtime": 1793913025.8233833,
+    "seen": 1794054390.6860847,
+    "ast_hash": "7aad96b6b4b896ad594a5542e6d9b56d",
+    "semantic_hash": "7aad96b6b4b896ad594a5542e6d9b56d"
+  },
+  "docs/engine.md": {
+    "mtime": 1793912860.1988146,
+    "seen": 1794054390.6860847,
+    "ast_hash": "15335ce7810fa9eb4a6c600eece99457",
+    "semantic_hash": "15335ce7810fa9eb4a6c600eece99457"
+  },
+  "docs/project_review.md": {
+    "mtime": 1793912947.70864,
+    "seen": 1794054390.6860847,
+    "ast_hash": "e538b45f3745888b3658db9e42020908",
+    "semantic_hash": "e538b45f3745888b3658db9e42020908"
+  },
+  "football_drl_final_project_plan.docx": {
+    "mtime": 1792863434.6299174,
+    "seen": 1794054390.6860847,
+    "ast_hash": "9656e12adaedb217e59af3cccb7d0f5c",
+    "semantic_hash": "9656e12adaedb217e59af3cccb7d0f5c"
+  },
+  "logs/.gitkeep": {
+    "mtime": 1793731552.8961217,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "models/.gitkeep": {
+    "mtime": 1793731552.8961217,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "results/.gitkeep": {
+    "mtime": 1793731552.9019117,
+    "seen": 1794054390.6860847,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "uv.lock": {
+    "mtime": 1793912506.9568894,
+    "seen": 1794054390.6860847,
+    "ast_hash": "70ce46283a8eab22d0c91fa4f0e6b5de",
+    "semantic_hash": "70ce46283a8eab22d0c91fa4f0e6b5de"
+  }
+}

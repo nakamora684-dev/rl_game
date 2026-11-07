@@ -15,3 +15,8 @@ results/*
 !results/.gitkeep
 # but allow small committed final results if you want:
 # !results/final/
+
+# Graphify: keep reviewable outputs available to share, not local caches/previews.
+graphify-out/cache/
+graphify-out/source-previews/
+graphify-out/.graphify*

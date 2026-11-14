@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Football DRL — Project Review</title><style>body{font:16px/1.6 system-ui,sans-serif;max-width:1100px;margin:auto;padding:32px;background:#f5f7fb;color:#18243b}nav{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}a{color:#164cad}nav a{background:white;border:1px solid #cbd5e1;border-radius:8px;padding:12px;text-decoration:none}section,figure{background:white;padding:24px;border-radius:12px;margin:24px 0}img{max-width:100%;height:auto}pre{white-space:pre-wrap;font:14px/1.6 ui-monospace,monospace}small,figcaption{color:#526176}.warning{border-left:4px solid #bb7600;padding-left:16px}</style><h1>1v1 Football DRL — Project Knowledge</h1><p>Source-backed code, design, tests, original plan, and team roadmap. Distinguish <strong>implemented</strong>, <strong>approved starting settings</strong>, <strong>proposed</strong>, and <strong>planned</strong> labels.</p><nav><a href="graph.html">Interactive knowledge graph</a><a href="GRAPH_TREE.html">File / symbol tree</a><a href="GRAPH_REPORT.md">Graph report</a><a href="graph.json">Raw graph JSON</a><a href="graph_health.json">Integrity diagnostics</a><a href="graph_build.json">Coverage and provenance</a></nav><section><h2>Snapshot</h2><p>409 nodes · 1310 visual edges · 19 communities. Engine checks: 194 tests passed; full-stack import test intentionally excluded.</p><p class="warning">This is not a finished football game: attachment, kicks, possession, collisions, scoring, rendering, and RL remain incomplete. Historical figures are not current implementation claims.</p><p>AST extraction is local. Semantic token counts were not reported by the harness; they are recorded as unknown, not zero. Free model routes were used; no additional API keys or hosted Graphify service were configured.</p></section><section class="warning"><h2>Graph health warning</h2><p>{&#x27;undirected_same_endpoint_collapsed_edges&#x27;: 123}. See diagnostics; the visual graph can merge repeated/parallel source relationships.</p></section><section><h2>Human review map</h2><pre># Project review map
+
+This is the human entry point for the Graphify project graph. Labels distinguish
+implemented code, approved starting settings, proposals, and planned team work.
+The graph is an index of source evidence, not proof that every planned feature exists.
+
+## Source authority and history
+
+- `football_drl_final_project_plan.docx` is the original team plan and assignment context.
+- `AGENTS.md` records the newer student-approved decisions and implementation status.
+- `docs/engine.md` documents current engine behavior and its tests.
+- `README.md`, `pyproject.toml`, `uv.lock`, and `.python-version` describe reproducible setup.
+- `game/` and `tests/` are the current implementation and executable checks.
+- The original plan&#x27;s continuous x/y movement action is superseded by the approved
+  nine-direction + continuous effort/power + binary kick interface. The engine only
+  implements its movement subset; the hybrid PPO encoding is still open.
+- The plan&#x27;s pitch drawing uses y-up; the approved engine convention is x-right/y-down.
+- The graph must preserve these historical differences rather than silently merging them.
+
+## Implemented: Member A foundation
+
+- Immutable player, free-ball, movement-action, configuration, and simulation snapshots.
+- 60 Hz physics; each decision advances up to six individual ticks (10 Hz).
+- Both players use identical movement and stamina equations.
+- Nine normalized movement directions including idle, continuous effort, gradual
+  target-velocity acceleration, smooth facing, constant idle braking, and pitch bounds.
+- Stamina consumption/recovery and gradual speed/acceleration fatigue, not momentum scaling.
+- Free-ball constant-deceleration motion, including partial-tick stopping; no pitch clamp.
+- Reset, side swapping, 60-second clock running through restart scaffolds, and one-shot finish.
+- Headless movement, stamina, and ball inspection commands. No graphical inspection yet.
+
+## Approved starting settings: still subject to tuning
+
+| Setting | Starting value / interpretation |
+|---|---|
+| Coordinates | x right, y down; facing zero east, positive clockwise |
+| Movement intent | Idle, N, NE, E, SE, S, SW, W, NW; diagonals normalized |
+| Effort / kick power | Continuous `[0,1]`; binary kick request once per decision |
+| Speed / acceleration | 160 units/s base speed; 320 units/s² base acceleration |
+| Player idle braking | 40 units/s²; 4 s to stop from base speed, needs play testing |
+| Stamina | 100 maximum; 5/s full-effort drain; 100/15 per second idle recovery |
+| Neutral effort | 0.5; no drain/recovery for active movement at this effort |
+| Empty-stamina performance | 50% speed/acceleration; braking and facing unaffected |
+| Free-ball roll | 300 units/s reference, 100 units/s² deceleration, 3 s / 450 units |
+| Clock | 3,600 ticks; time runs during restarts; goals will not end the match |
+
+Pitch size 800×500, player radius 15, and turn rate 2π radians/s remain configurable
+implementation defaults. Reference ball speed does not finalize maximum kick speed.
+
+## Planned: remaining Member A mechanics
+
+1. Controlled-ball attachment, authoritative possession owner, and separate last toucher.
+2. Facing-based kick release and power mapping; precise request expiry/cooldown semantics.
+3. Player/ball and player/player collisions, free-ball recovery, steal contest and cooldown.
+4. Swept full-ball goal/boundary checks, scores, restart placement/ownership, and events.
+5. Renderer/environment equivalence, throughput measurement, and engine report section.
+
+Restart phases currently only freeze state and count down. They do not implement
+football restarts; stamina recovery during real restarts is not decided. The ball can
+currently leave the pitch without scoring. A3 and the overall Member A mission are not complete.
+
+## Planned: team ownership and interfaces
+
+| Owner | Area | Main handoff |
+|---|---|---|
+| A | Shared simulation and physics/event tests | State, actions, fixed stepping, trustworthy transitions |
+| B | Pygame, human controls, rule-based baseline | Reads engine state; never owns physics |
+| C | Gymnasium observation/reward/action adapter | Computes rewards outside engine; agrees hybrid action encoding with D |
+| D | PPO/custom MLP, logging, evaluation/release | TensorBoard undiscounted returns, CSV, notebook, report |
+
+PPO is the chosen baseline, not an implemented learner. Final observation features,
+reward weights, network architecture, training budget, and baseline behavior are open.
+Root play/train/test/observe scripts are scaffolds. The evaluation notebook/report
+remain deliverables, not existing completed results.
+
+## Assignment and validation context
+
+Delivery deadline: 31 December 2026; proposed feature freeze: 19 December. The plan
+requires graphical/headless modes, customized network, a documented rule-based
+baseline, TensorBoard episode returns, multi-metric comparison, CSV, `evaluate.ipynb`,
+README/uv setup, and PDF report/slides. Four-person team approval may need confirmation.
+
+Evaluation should use held-out seeds and both attacking sides; proposed sample size
+is about 100 matches per comparison if feasible. Outcomes and goal difference matter
+more than rising shaped reward. Steals and loose-ball recovery must remain distinct.
+
+Engine tests run with `uv run --locked --only-group engine pytest -m &quot;not full_stack&quot;`.
+The full-stack import test is intentionally excluded without graphics/ML dependencies.
+Deterministic unit tests do not demonstrate realistic tuning, successful training,
+or completed integration. See actual command results rather than inferred test success.
+</pre></section><h2>Original planning figures</h2><figure><img src="diagrams/image1.png" alt="Original pitch proposal (y-up; current engine uses y-down)"><figcaption>Original pitch proposal (y-up; current engine uses y-down)</figcaption></figure><figure><img src="diagrams/image2.png" alt="Original architecture proposal (five continuous inputs are superseded by the approved hybrid controls)"><figcaption>Original architecture proposal (five continuous inputs are superseded by the approved hybrid controls)</figcaption></figure><figure><img src="diagrams/image3.png" alt="Proposed schedule, not evidence of completed phases"><figcaption>Proposed schedule, not evidence of completed phases</figcaption></figure><small>These three figures were extracted without modification from football_drl_final_project_plan.docx.</small></html>

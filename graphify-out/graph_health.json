@@ -1,0 +1,335 @@
+{
+  "node_count": 409,
+  "unverified_node_count": 0,
+  "raw_edge_count": 1433,
+  "non_object_edges": 0,
+  "missing_endpoint_edges": 0,
+  "dangling_endpoint_edges": 0,
+  "external_reference_edges": 0,
+  "self_loop_edges": 0,
+  "valid_candidate_edges": 1433,
+  "exact_duplicate_edges": 0,
+  "directed_unique_endpoint_pairs": 1311,
+  "directed_same_endpoint_collapsed_edges": 122,
+  "undirected_unique_endpoint_pairs": 1310,
+  "undirected_same_endpoint_collapsed_edges": 123,
+  "same_endpoint_group_count": 121,
+  "relation_variant_groups": 111,
+  "source_file_variant_groups": 0,
+  "source_location_variant_groups": 6,
+  "context_variant_groups": 4,
+  "post_build_graph_type": "Graph",
+  "post_build_node_count": 409,
+  "post_build_edge_count": 1310,
+  "post_build_error": "",
+  "producer_suppression": {
+    "path": "C:\\Users\\shuj8\\AppData\\Roaming\\uv\\tools\\graphifyy\\Lib\\site-packages\\graphify\\extract.py",
+    "total_sites": 12,
+    "sites": [
+      {
+        "line": 1859,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2554,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2556,
+        "name": "seen_doc_refs",
+        "tuple_arity": 0,
+        "sample": "seen_doc_refs: set[str] = set()"
+      },
+      {
+        "line": 3223,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 3370,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n.get(\"id\") for n in nodes}"
+      },
+      {
+        "line": 4784,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 4970,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 8790,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8898,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8977,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 9502,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 9503,
+        "name": "seen_edges",
+        "tuple_arity": 4,
+        "sample": "seen_edges: set[tuple[str, str, str, str | None]] = set()"
+      }
+    ],
+    "error": ""
+  },
+  "examples": [
+    {
+      "source": "github_workflows_ci_test_steps",
+      "target": "github_workflows_ci_steps_run",
+      "edge_count": 3,
+      "relations": [
+        "contains"
+      ],
+      "source_files": [
+        ".github/workflows/ci.yml"
+      ],
+      "source_locations": [
+        "L10",
+        "L11",
+        "L9"
+      ],
+      "contexts": [
+        ""
+      ]
+    },
+    {
+      "source": "github_workflows_ci_test_steps",
+      "target": "github_workflows_ci_steps_uses",
+      "edge_count": 2,
+      "relations": [
+        "contains"
+      ],
+      "source_files": [
+        ".github/workflows/ci.yml"
+      ],
+      "source_locations": [
+        "L7",
+        "L8"
+      ],
+      "contexts": [
+        ""
+      ]
+    },
+    {
+      "source": "game_ball_step_free_ball",
+      "target": "game_ball_ballstate",
+      "edge_count": 2,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "game/ball.py"
+      ],
+      "source_locations": [
+        "L28"
+      ],
+      "contexts": [
+        "parameter_type",
+        "return_type"
+      ]
+    },
+    {
+      "source": "game_ball_step_free_ball",
+      "target": "game_config_ballconfig",
+      "edge_count": 2,
+      "relations": [
+        "references",
+        "uses"
+      ],
+      "source_files": [
+        "game/ball.py"
+      ],
+      "source_locations": [
+        "L28"
+      ],
+      "contexts": [
+        "",
+        "parameter_type"
+      ]
+    },
+    {
+      "source": "game_player_step_idle_player",
+      "target": "game_player_playerstate",
+      "edge_count": 2,
+      "relations": [
+        "references"
+      ],
+      "source_files": [
+        "game/player.py"
+      ],
+      "source_locations": [
+        "L43"
+      ],
+      "contexts": [
+        "parameter_type",
+        "return_type"
+      ]
+    }
+  ],
+  "parallel_relation_evidence_preserved_in_graph_json": true,
+  "verified_local_python_import_cycles": [],
+  "local_python_import_edges": [
+    [
+      "game/__main__.py",
+      "game/actions.py"
+    ],
+    [
+      "game/__main__.py",
+      "game/ball.py"
+    ],
+    [
+      "game/__main__.py",
+      "game/config.py"
+    ],
+    [
+      "game/__main__.py",
+      "game/player.py"
+    ],
+    [
+      "game/__main__.py",
+      "game/simulation.py"
+    ],
+    [
+      "game/__main__.py",
+      "game/stamina.py"
+    ],
+    [
+      "game/ball.py",
+      "game/config.py"
+    ],
+    [
+      "game/player.py",
+      "game/actions.py"
+    ],
+    [
+      "game/player.py",
+      "game/config.py"
+    ],
+    [
+      "game/player.py",
+      "game/stamina.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/actions.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/ball.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/config.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/player.py"
+    ],
+    [
+      "game/stamina.py",
+      "game/actions.py"
+    ],
+    [
+      "game/stamina.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_ball.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_ball.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_ball.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_player_controls.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_player_controls.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_player_controls.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_player_motion.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_player_motion.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_player_motion.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_simulation.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_simulation.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_simulation.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_stamina.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_stamina.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_stamina.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_stamina.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_stamina.py",
+      "game/stamina.py"
+    ]
+  ],
+  "import_cycle_method": "Directed Python AST imports between actual local modules, not inferred from the undirected knowledge graph."
+}

@@ -14,16 +14,25 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "ipykernel>=7.4.0",
-    "jupyter>=1.1.1",
+engine = [
     "pytest>=9.2.0",
     "ruff>=0.17.3",
+]
+graphify = [
+    "graphifyy==0.9.103",
+]
+dev = [
+    { include-group = "engine" },
+    "ipykernel>=7.4.0",
+    "jupyter>=1.1.1",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "full_stack: requires the full project dependencies, not just the engine tools",
+]
 
 [tool.ruff]
 line-length = 100

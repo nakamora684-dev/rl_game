@@ -1,0 +1,63 @@
+{
+  "built_at": "2026-11-07T12:26:30.661387+00:00",
+  "graphify_version": "0.9.103",
+  "source_files": [
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    ".python-version",
+    "AGENTS.md",
+    "README.md",
+    "agents/__init__.py",
+    "docs/engine.md",
+    "docs/project_review.md",
+    "environment/__init__.py",
+    "football_drl_final_project_plan.docx",
+    "game/__init__.py",
+    "game/__main__.py",
+    "game/actions.py",
+    "game/ball.py",
+    "game/config.py",
+    "game/player.py",
+    "game/simulation.py",
+    "game/stamina.py",
+    "logs/.gitkeep",
+    "models/.gitkeep",
+    "observe.py",
+    "play.py",
+    "pyproject.toml",
+    "rendering/__init__.py",
+    "results/.gitkeep",
+    "test.py",
+    "tests/test_ball.py",
+    "tests/test_demo.py",
+    "tests/test_player_controls.py",
+    "tests/test_player_motion.py",
+    "tests/test_simulation.py",
+    "tests/test_smoke.py",
+    "tests/test_stamina.py",
+    "train.py",
+    "uv.lock"
+  ],
+  "semantic_coverage": {
+    "AGENTS.md": 289,
+    "README.md": 88,
+    "docs/engine.md": 202,
+    "docs/project_review.md": 90,
+    "graphify-out/source-previews/original_project_plan.md": 241,
+    "graphify-out/source-previews/image1.png": 1,
+    "graphify-out/source-previews/image2.png": 1,
+    "graphify-out/source-previews/image3.png": 1
+  },
+  "word_extraction": "ZIP/XML text+tables and three embedded-image visual reviews",
+  "source_previews_remapped_to_original_document": true,
+  "semantic_token_usage": "unknown: harness exposes no usage field",
+  "additional_api_calls": false,
+  "models": [
+    "opencode/deepseek-v4.1-flash-free",
+    "opencode/flint-40b-free",
+    "opencode/nemotron-3.5-super-vl-free"
+  ],
+  "health_flags": {
+    "undirected_same_endpoint_collapsed_edges": 123
+  }
+}

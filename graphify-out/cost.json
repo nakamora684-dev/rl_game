@@ -1,0 +1,12 @@
+{
+  "runs": [
+    {
+      "date": "2026-11-07T12:26:30.667243+00:00",
+      "input_tokens": null,
+      "output_tokens": null,
+      "note": "Agent usage not reported; do not interpret schema placeholders as measured zero."
+    }
+  ],
+  "total_input_tokens": null,
+  "total_output_tokens": null
+}

@@ -2,10 +2,11 @@
 
 Positions use logical units, velocity units/second, and facing radians.
 Facing zero points east; positive angles turn clockwise in the y-down world.
-Player-player collisions are not implemented.
+Shared simulation resolves player-player contact separately after movement updates.
 """
 
 from dataclasses import dataclass, replace
+from enum import StrEnum
 from math import atan2, hypot, isclose, isfinite, pi, tau
 
 from game.actions import Direction, MovementAction
@@ -16,14 +17,23 @@ _DEFAULT_MOVEMENT = MovementConfig()
 _DEFAULT_STAMINA = StaminaConfig()
 
 
+class PlayerId(StrEnum):
+    """Stable identity, independent of spawn side or attack orientation."""
+
+    A = "A"
+    B = "B"
+
+
 @dataclass(frozen=True)
 class PlayerState:
-    """Minimal player snapshot; interaction timers will be added with possession."""
+    """Player snapshot; interaction timers advance in shared simulation, not movement."""
 
     position: tuple[float, float]
     velocity: tuple[float, float] = (0.0, 0.0)
     facing: float = 0.0
     stamina: float = 100.0
+    kick_cooldown_ticks: int = 0
+    pickup_lockout_ticks: int = 0
 
     def __post_init__(self) -> None:
         for vector in (self.position, self.velocity):
@@ -38,6 +48,10 @@ class PlayerState:
             raise ValueError("Facing must be finite.")
         if not isfinite(self.stamina) or not 0.0 <= self.stamina <= 100.0:
             raise ValueError("Stamina must be finite and within [0, 100].")
+        if type(self.kick_cooldown_ticks) is not int or self.kick_cooldown_ticks < 0:
+            raise ValueError("Kick cooldown must be a nonnegative integer number of ticks.")
+        if type(self.pickup_lockout_ticks) is not int or self.pickup_lockout_ticks < 0:
+            raise ValueError("Pickup lockout must be a nonnegative integer number of ticks.")
 
 
 def step_idle_player(player: PlayerState, *, braking: float = DEFAULT_BRAKING) -> PlayerState:

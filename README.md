@@ -18,10 +18,35 @@ uv run --locked --only-group engine ruff format --check game tests
 uv run --locked --only-group engine python -m game
 uv run --locked --only-group engine python -m game --stamina
 uv run --locked --only-group engine python -m game --ball
+uv run --locked --only-group engine python -m game --dribble
+uv run --locked --only-group engine python -m game --kick
+uv run --locked --only-group engine python -m game --kick-actions
+uv run --locked --only-group engine python -m game --pickup
+uv run --locked --only-group engine python -m game --steal
+uv run --locked --only-group engine python -m game --rules
+uv run --locked --only-group engine python -m game --contacts
 ```
 
 The inspection commands print a movement/clock demonstration, a 20-second sprint /
-15-second rest CSV trace, and a reference free-ball roll CSV. None is a playable game.
+15-second rest CSV trace, a reference free-ball roll, controlled dribbling, and direct kick release CSVs.
+None is a playable game; possession assignment in the dribble demo is explicit setup,
+not an implemented pickup/steal rule.
+`--kick` isolates direct release at the reference speed. `--kick-actions` compares full
+decision actions at powers 0/0.5/1: linear 50–300 units/s mapping, first-tick-only kick
+attempts, and a 12-tick per-player cooldown. See `docs/engine.md` for exact semantics.
+`--pickup` shows automatic interception: contact radius 22, any-speed control, swept
+first-contact selection, and a separate 12-tick kicker pickup lockout. Exact ties stay
+free. Recovery events are distinct from setup and stealing. `--kick` keeps the opponent
+off the shot path to isolate roll physics. Player bodies now use sliding, non-bouncy
+contact. `--steal` shows the 18-tick contest and 30-tick protection; `--rules` compares
+goals, last-touch boundaries and one-second restarts. Stamina freezes during restarts
+while match time continues. `--contacts` isolates locked-player/post rebounds, controlled
+post loss and post→goal in one tick; it is not a full-match runner. Ball normal restitution
+is 0.5 off pickup-locked players (no recoil) and 0.7 off radius-4 posts; eligible players
+still trap. Bounded multi-contact processing emits collision/constraint/limit telemetry.
+The core still has no renderer/RL wrapper or full-match runner; default strict-clearance
+goals intentionally require kicks. Snapshot sweeps are not an exact rigid-body solver;
+visual validation and tuning remain. See [the next-session handoff](docs/next_session.md).
 The `full_stack` dependency-import test is intentionally excluded from engine-only runs.
 Use `--only-group engine` on `uv run` too: omitting it can install the full project stack.
 
@@ -58,14 +83,14 @@ a separate action; document/media semantic extraction may use an LLM provider.
 ### Review the project knowledge graph
 Start with [docs/project_review.md](docs/project_review.md) for implementation status
 and approved-versus-planned decisions. Graphify outputs live in `graphify-out/`:
-open `graph.html` for the interactive map, `GRAPH_TREE.html` for a file-oriented tree,
+open `index.html` for the review landing page, `graph.html` for the interactive map, `GRAPH_TREE.html` for a file-oriented tree,
 or `GRAPH_REPORT.md` for the text summary; `graph.json` is the queryable graph.
 The graph covers code, tests, current documentation, and the original Word plan's
 text/tables/figures. Current decisions supersede older plan proposals where noted.
 
 ```powershell
 graphify query "free ball stopping distance" --budget 1200
-graphify query "implemented features and planned possession" --budget 1200
+graphify query "controlled possession setup versus automatic pickup" --budget 1200
 ```
 
 The graph is a snapshot: rebuild with `/graphify .` after substantive code/design

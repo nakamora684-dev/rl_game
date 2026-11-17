@@ -199,7 +199,7 @@ def test_complete_match_sprint_rest_checkpoints_and_different_player_stamina():
         action = SPRINT if decision < 200 else REST if decision < 350 else neutral
         result = step_decision(state, action, neutral)
         state = result.state
-        event_count += len(result.events)
+        event_count += sum(event.kind == "match_finished" for event in result.events)
         assert 0.0 <= state.player_a.stamina <= 100.0
         assert state.player_b.stamina == 40.0
         if decision == 199:

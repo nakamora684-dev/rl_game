@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-11-07T12:26:30.661387+00:00",
+  "built_at": "2026-11-11T11:08:51.263768+00:00",
   "graphify_version": "0.9.103",
   "source_files": [
     ".github/workflows/ci.yml",
@@ -9,6 +9,7 @@
     "README.md",
     "agents/__init__.py",
     "docs/engine.md",
+    "docs/next_session.md",
     "docs/project_review.md",
     "environment/__init__.py",
     "football_drl_final_project_plan.docx",
@@ -16,8 +17,14 @@
     "game/__main__.py",
     "game/actions.py",
     "game/ball.py",
+    "game/ball_contacts.py",
+    "game/collisions.py",
     "game/config.py",
+    "game/geometry.py",
     "game/player.py",
+    "game/possession.py",
+    "game/rebounds.py",
+    "game/rules.py",
     "game/simulation.py",
     "game/stamina.py",
     "logs/.gitkeep",
@@ -29,20 +36,31 @@
     "results/.gitkeep",
     "test.py",
     "tests/test_ball.py",
+    "tests/test_ball_contacts.py",
+    "tests/test_collisions.py",
     "tests/test_demo.py",
+    "tests/test_kick.py",
+    "tests/test_kick_actions.py",
+    "tests/test_physics_contacts.py",
+    "tests/test_pickup.py",
     "tests/test_player_controls.py",
     "tests/test_player_motion.py",
+    "tests/test_possession.py",
+    "tests/test_rebounds.py",
+    "tests/test_rules.py",
     "tests/test_simulation.py",
     "tests/test_smoke.py",
     "tests/test_stamina.py",
+    "tests/test_stealing.py",
     "train.py",
     "uv.lock"
   ],
   "semantic_coverage": {
-    "AGENTS.md": 289,
-    "README.md": 88,
-    "docs/engine.md": 202,
-    "docs/project_review.md": 90,
+    "AGENTS.md": 330,
+    "README.md": 113,
+    "docs/engine.md": 650,
+    "docs/project_review.md": 126,
+    "docs/next_session.md": 110,
     "graphify-out/source-previews/original_project_plan.md": 241,
     "graphify-out/source-previews/image1.png": 1,
     "graphify-out/source-previews/image2.png": 1,
@@ -58,6 +76,6 @@
     "opencode/nemotron-3.5-super-vl-free"
   ],
   "health_flags": {
-    "undirected_same_endpoint_collapsed_edges": 123
+    "undirected_same_endpoint_collapsed_edges": 327
   }
 }

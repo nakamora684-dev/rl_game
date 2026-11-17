@@ -1,4 +1,4 @@
-"""Movement intent in logical coordinates: x right, y down (not grid positions)."""
+"""Hybrid player intent in logical coordinates: x right, y down (not grid positions)."""
 
 from dataclasses import dataclass
 from enum import IntEnum
@@ -40,7 +40,7 @@ _DIRECTION_VECTORS = (
 
 @dataclass(frozen=True)
 class MovementAction:
-    """Movement-only subset of the hybrid action; kicks are not implemented yet.
+    """Movement-only subset, also accepted by simulation for backward compatibility.
 
     Use Direction(raw_id) when adapting numerical controls to this typed interface.
     Invalid efforts are rejected rather than silently clipped inside physics.
@@ -54,3 +54,22 @@ class MovementAction:
             raise TypeError("Direction must be a Direction enum member.")
         if not isfinite(self.effort) or not 0.0 <= self.effort <= 1.0:
             raise ValueError("Effort must be finite and within [0, 1].")
+
+
+@dataclass(frozen=True)
+class PlayerAction(MovementAction):
+    """Hybrid engine action, not an SB3 action-space encoding.
+
+    Trigger 1 requests one kick per decision; power 0 still requests the minimum
+    speed. A trigger in step_tick represents a fresh single-tick request.
+    """
+
+    kick_trigger: int = 0
+    kick_power: float = 0.0
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if type(self.kick_trigger) not in (int, bool) or self.kick_trigger not in (0, 1):
+            raise ValueError("Kick trigger must be binary (0 or 1).")
+        if not isfinite(self.kick_power) or not 0.0 <= self.kick_power <= 1.0:
+            raise ValueError("Kick power must be finite and within [0, 1].")

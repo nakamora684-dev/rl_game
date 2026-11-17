@@ -24,40 +24,40 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "game/__main__.py": {
-    "mtime": 1793913025.8174584,
-    "seen": 1794054390.6860847,
-    "ast_hash": "0e4729c1a35955776bfe40c0dd3576dc",
-    "semantic_hash": "0e4729c1a35955776bfe40c0dd3576dc"
+    "mtime": 1794394981.636255,
+    "seen": 1794395331.325648,
+    "ast_hash": "91047a1bc93e2b786d35a8e51eb14225",
+    "semantic_hash": "91047a1bc93e2b786d35a8e51eb14225"
   },
   "game/actions.py": {
-    "mtime": 1793835146.7752984,
-    "seen": 1794054390.6860847,
-    "ast_hash": "c8734916d6b34632f0524d2d74deebe2",
-    "semantic_hash": "c8734916d6b34632f0524d2d74deebe2"
+    "mtime": 1794058644.036697,
+    "seen": 1794058899.516036,
+    "ast_hash": "a7e304a9f7f784d079c0843f7a25040c",
+    "semantic_hash": "a7e304a9f7f784d079c0843f7a25040c"
   },
   "game/ball.py": {
-    "mtime": 1793912801.8791394,
-    "seen": 1794054390.6860847,
-    "ast_hash": "6d33da0fde4ee6f318a35b3f096e95a0",
-    "semantic_hash": "6d33da0fde4ee6f318a35b3f096e95a0"
+    "mtime": 1794392982.2653475,
+    "seen": 1794395331.325648,
+    "ast_hash": "53f616e1b61a27f290157842b8f4e8c9",
+    "semantic_hash": "53f616e1b61a27f290157842b8f4e8c9"
   },
   "game/config.py": {
-    "mtime": 1793912801.8778808,
-    "seen": 1794054390.6860847,
-    "ast_hash": "d883878f9c5abfed9ffc8ade9c2f04b5",
-    "semantic_hash": "d883878f9c5abfed9ffc8ade9c2f04b5"
+    "mtime": 1794392982.2653475,
+    "seen": 1794395331.325648,
+    "ast_hash": "ae7df4d4e2307de8d7ae3892dd055ba3",
+    "semantic_hash": "ae7df4d4e2307de8d7ae3892dd055ba3"
   },
   "game/player.py": {
-    "mtime": 1793893750.9250767,
-    "seen": 1794054390.6860847,
-    "ast_hash": "2c051d9ffa6def385cc482b9e1d81383",
-    "semantic_hash": "2c051d9ffa6def385cc482b9e1d81383"
+    "mtime": 1794390600.011034,
+    "seen": 1794390967.024605,
+    "ast_hash": "763cef3394c9122e1797b92e759d8c9c",
+    "semantic_hash": "763cef3394c9122e1797b92e759d8c9c"
   },
   "game/simulation.py": {
-    "mtime": 1793912801.8851142,
-    "seen": 1794054390.6860847,
-    "ast_hash": "576e48681e19021bacfdbf5868740ed9",
-    "semantic_hash": "576e48681e19021bacfdbf5868740ed9"
+    "mtime": 1794395056.3199346,
+    "seen": 1794395331.325648,
+    "ast_hash": "018352129b08b9ab0eea040e8c693e92",
+    "semantic_hash": "018352129b08b9ab0eea040e8c693e92"
   },
   "game/stamina.py": {
     "mtime": 1793893750.9189937,
@@ -102,10 +102,10 @@
     "semantic_hash": "f3d4af6c16cbe15be968f66ff51c18ae"
   },
   "tests/test_demo.py": {
-    "mtime": 1793912860.1988146,
-    "seen": 1794054390.6860847,
-    "ast_hash": "c547a2be7d51d71c8ba465305de95568",
-    "semantic_hash": "c547a2be7d51d71c8ba465305de95568"
+    "mtime": 1794394981.636255,
+    "seen": 1794395331.325648,
+    "ast_hash": "99b9ed539e76042b1bf336951865a358",
+    "semantic_hash": "99b9ed539e76042b1bf336951865a358"
   },
   "tests/test_player_controls.py": {
     "mtime": 1793893844.4420109,
@@ -132,10 +132,10 @@
     "semantic_hash": "727fe483e1f76abefbcbc633b045df6d"
   },
   "tests/test_stamina.py": {
-    "mtime": 1793894117.9975028,
-    "seen": 1794054390.6860847,
-    "ast_hash": "f3d20d85c04800803c26f6b9919e2ab7",
-    "semantic_hash": "f3d20d85c04800803c26f6b9919e2ab7"
+    "mtime": 1794059846.647954,
+    "seen": 1794060225.316093,
+    "ast_hash": "829d3ffc1de058c6bd22bf9c93b9f955",
+    "semantic_hash": "829d3ffc1de058c6bd22bf9c93b9f955"
   },
   "train.py": {
     "mtime": 1793731552.9036186,
@@ -156,28 +156,28 @@
     "semantic_hash": "33cc10613bb12360280f703cb78cd6c0"
   },
   "AGENTS.md": {
-    "mtime": 1793912860.208741,
-    "seen": 1794054390.6860847,
-    "ast_hash": "c6bf68896ece19d12c1a68c741823cbd",
-    "semantic_hash": "c6bf68896ece19d12c1a68c741823cbd"
+    "mtime": 1794395152.387072,
+    "seen": 1794395331.325648,
+    "ast_hash": "ee88e64f5030537fe3a31b42f8246eac",
+    "semantic_hash": "ee88e64f5030537fe3a31b42f8246eac"
   },
   "README.md": {
-    "mtime": 1793913025.8233833,
-    "seen": 1794054390.6860847,
-    "ast_hash": "7aad96b6b4b896ad594a5542e6d9b56d",
-    "semantic_hash": "7aad96b6b4b896ad594a5542e6d9b56d"
+    "mtime": 1794395113.588806,
+    "seen": 1794395331.325648,
+    "ast_hash": "65396ca54ac180b4e851334a2d4ed13b",
+    "semantic_hash": "65396ca54ac180b4e851334a2d4ed13b"
   },
   "docs/engine.md": {
-    "mtime": 1793912860.1988146,
-    "seen": 1794054390.6860847,
-    "ast_hash": "15335ce7810fa9eb4a6c600eece99457",
-    "semantic_hash": "15335ce7810fa9eb4a6c600eece99457"
+    "mtime": 1794395113.588806,
+    "seen": 1794395331.325648,
+    "ast_hash": "6b6056b98f5f92c9c498a4465887117d",
+    "semantic_hash": "6b6056b98f5f92c9c498a4465887117d"
   },
   "docs/project_review.md": {
-    "mtime": 1793912947.70864,
-    "seen": 1794054390.6860847,
-    "ast_hash": "e538b45f3745888b3658db9e42020908",
-    "semantic_hash": "e538b45f3745888b3658db9e42020908"
+    "mtime": 1794395113.588806,
+    "seen": 1794395331.325648,
+    "ast_hash": "3a14f2e2b27315f26fa12ac15de84caf",
+    "semantic_hash": "3a14f2e2b27315f26fa12ac15de84caf"
   },
   "football_drl_final_project_plan.docx": {
     "mtime": 1792863434.6299174,
@@ -208,5 +208,107 @@
     "seen": 1794054390.6860847,
     "ast_hash": "70ce46283a8eab22d0c91fa4f0e6b5de",
     "semantic_hash": "70ce46283a8eab22d0c91fa4f0e6b5de"
+  },
+  "game/possession.py": {
+    "mtime": 1794390600.0130556,
+    "seen": 1794390967.024605,
+    "ast_hash": "3b542ec2733a567a83fff4102ed59b63",
+    "semantic_hash": "3b542ec2733a567a83fff4102ed59b63"
+  },
+  "tests/test_possession.py": {
+    "mtime": 1794055724.8972993,
+    "seen": 1794056196.1409428,
+    "ast_hash": "d1a361209766acbdf95036771d9eb025",
+    "semantic_hash": "d1a361209766acbdf95036771d9eb025"
+  },
+  "tests/test_kick.py": {
+    "mtime": 1794059846.647954,
+    "seen": 1794060225.316093,
+    "ast_hash": "13731fc5556a819a765e995e3e0461ba",
+    "semantic_hash": "13731fc5556a819a765e995e3e0461ba"
+  },
+  "tests/test_kick_actions.py": {
+    "mtime": 1794059846.647954,
+    "seen": 1794060225.316093,
+    "ast_hash": "3bd13ce1232625e2af9ab15f00c83e22",
+    "semantic_hash": "3bd13ce1232625e2af9ab15f00c83e22"
+  },
+  "tests/test_pickup.py": {
+    "mtime": 1794393576.6797073,
+    "seen": 1794395331.325648,
+    "ast_hash": "61c830f3dc827ab18dd2f6cc476451c2",
+    "semantic_hash": "61c830f3dc827ab18dd2f6cc476451c2"
+  },
+  "game/collisions.py": {
+    "mtime": 1794394651.7439573,
+    "seen": 1794395331.325648,
+    "ast_hash": "99acb313ca3d6fac312ea902a43a30c8",
+    "semantic_hash": "99acb313ca3d6fac312ea902a43a30c8"
+  },
+  "game/geometry.py": {
+    "mtime": 1794060660.114808,
+    "seen": 1794390967.024605,
+    "ast_hash": "47c3a0df7d1e182e87cffd59576eb249",
+    "semantic_hash": "47c3a0df7d1e182e87cffd59576eb249"
+  },
+  "game/rules.py": {
+    "mtime": 1794392982.269907,
+    "seen": 1794395331.325648,
+    "ast_hash": "e578cf77d9fe0ecfa6ac94c1ce6cd637",
+    "semantic_hash": "e578cf77d9fe0ecfa6ac94c1ce6cd637"
+  },
+  "tests/test_collisions.py": {
+    "mtime": 1794061163.8361766,
+    "seen": 1794390967.024605,
+    "ast_hash": "46b48be60359df70e509ee5a2a585e22",
+    "semantic_hash": "46b48be60359df70e509ee5a2a585e22"
+  },
+  "tests/test_rules.py": {
+    "mtime": 1794390229.8828561,
+    "seen": 1794390967.024605,
+    "ast_hash": "51de2c27b068dc9e8ab08ee4d676dad0",
+    "semantic_hash": "51de2c27b068dc9e8ab08ee4d676dad0"
+  },
+  "tests/test_stealing.py": {
+    "mtime": 1794061163.8361766,
+    "seen": 1794390967.024605,
+    "ast_hash": "0b50e0b05b127b6ee7e8f6829fba3dcc",
+    "semantic_hash": "0b50e0b05b127b6ee7e8f6829fba3dcc"
+  },
+  "game/ball_contacts.py": {
+    "mtime": 1794394651.7439573,
+    "seen": 1794395331.325648,
+    "ast_hash": "9c15f83c392b30c5939462527b5319a8",
+    "semantic_hash": "9c15f83c392b30c5939462527b5319a8"
+  },
+  "game/rebounds.py": {
+    "mtime": 1794394558.282047,
+    "seen": 1794395331.325648,
+    "ast_hash": "a752cd72961b85c0fde312cf665e38ce",
+    "semantic_hash": "a752cd72961b85c0fde312cf665e38ce"
+  },
+  "tests/test_ball_contacts.py": {
+    "mtime": 1794394231.384348,
+    "seen": 1794395331.325648,
+    "ast_hash": "01f94ebff9934f6c957cfb7dde2243e7",
+    "semantic_hash": "01f94ebff9934f6c957cfb7dde2243e7"
+  },
+  "tests/test_physics_contacts.py": {
+    "mtime": 1794395056.3209336,
+    "seen": 1794395331.325648,
+    "ast_hash": "d22c0cdc984b91cb0097e55be223be8e",
+    "semantic_hash": "d22c0cdc984b91cb0097e55be223be8e"
+  },
+  "tests/test_rebounds.py": {
+    "mtime": 1794394558.282047,
+    "seen": 1794395331.325648,
+    "ast_hash": "bbebd766392870247c8aa0dd68892af5",
+    "semantic_hash": "bbebd766392870247c8aa0dd68892af5"
+  },
+  "docs/next_session.md": {
+    "mtime": 1794395215.2887125,
+    "seen": 1794395331.325648,
+    "ast_hash": "1962998219e54df5e8669585490b883e",
+    "semantic_hash": "1962998219e54df5e8669585490b883e"
   }
 }

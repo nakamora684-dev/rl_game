@@ -1,26 +1,26 @@
 {
-  "node_count": 409,
+  "node_count": 754,
   "unverified_node_count": 0,
-  "raw_edge_count": 1433,
+  "raw_edge_count": 3533,
   "non_object_edges": 0,
   "missing_endpoint_edges": 0,
   "dangling_endpoint_edges": 0,
   "external_reference_edges": 0,
   "self_loop_edges": 0,
-  "valid_candidate_edges": 1433,
+  "valid_candidate_edges": 3533,
   "exact_duplicate_edges": 0,
-  "directed_unique_endpoint_pairs": 1311,
-  "directed_same_endpoint_collapsed_edges": 122,
-  "undirected_unique_endpoint_pairs": 1310,
-  "undirected_same_endpoint_collapsed_edges": 123,
-  "same_endpoint_group_count": 121,
-  "relation_variant_groups": 111,
+  "directed_unique_endpoint_pairs": 3209,
+  "directed_same_endpoint_collapsed_edges": 324,
+  "undirected_unique_endpoint_pairs": 3206,
+  "undirected_same_endpoint_collapsed_edges": 327,
+  "same_endpoint_group_count": 317,
+  "relation_variant_groups": 298,
   "source_file_variant_groups": 0,
-  "source_location_variant_groups": 6,
-  "context_variant_groups": 4,
+  "source_location_variant_groups": 10,
+  "context_variant_groups": 13,
   "post_build_graph_type": "Graph",
-  "post_build_node_count": 409,
-  "post_build_edge_count": 1310,
+  "post_build_node_count": 754,
+  "post_build_edge_count": 3206,
   "post_build_error": "",
   "producer_suppression": {
     "path": "C:\\Users\\shuj8\\AppData\\Roaming\\uv\\tools\\graphifyy\\Lib\\site-packages\\graphify\\extract.py",
@@ -122,74 +122,85 @@
       ]
     },
     {
-      "source": "github_workflows_ci_test_steps",
-      "target": "github_workflows_ci_steps_uses",
-      "edge_count": 2,
-      "relations": [
-        "contains"
-      ],
-      "source_files": [
-        ".github/workflows/ci.yml"
-      ],
-      "source_locations": [
-        "L7",
-        "L8"
-      ],
-      "contexts": [
-        ""
-      ]
-    },
-    {
-      "source": "game_ball_step_free_ball",
-      "target": "game_ball_ballstate",
-      "edge_count": 2,
-      "relations": [
-        "references"
-      ],
-      "source_files": [
-        "game/ball.py"
-      ],
-      "source_locations": [
-        "L28"
-      ],
-      "contexts": [
-        "parameter_type",
-        "return_type"
-      ]
-    },
-    {
-      "source": "game_ball_step_free_ball",
-      "target": "game_config_ballconfig",
-      "edge_count": 2,
+      "source": "game_collisions_resolve_player_contact",
+      "target": "game_player_playerstate",
+      "edge_count": 3,
       "relations": [
         "references",
         "uses"
       ],
       "source_files": [
-        "game/ball.py"
+        "game/collisions.py"
       ],
       "source_locations": [
-        "L28"
+        "L38",
+        "L39"
       ],
       "contexts": [
         "",
+        "generic_arg",
         "parameter_type"
       ]
     },
     {
-      "source": "game_player_step_idle_player",
+      "source": "game_collisions_player_posts",
       "target": "game_player_playerstate",
-      "edge_count": 2,
+      "edge_count": 3,
       "relations": [
-        "references"
+        "references",
+        "uses"
       ],
       "source_files": [
-        "game/player.py"
+        "game/collisions.py"
       ],
       "source_locations": [
-        "L43"
+        "L152",
+        "L153"
       ],
       "contexts": [
+        "",
+        "generic_arg",
+        "parameter_type"
+      ]
+    },
+    {
+      "source": "game_collisions_resolve_players",
+      "target": "game_player_playerstate",
+      "edge_count": 3,
+      "relations": [
+        "references",
+        "uses"
+      ],
+      "source_files": [
+        "game/collisions.py"
+      ],
+      "source_locations": [
+        "L205",
+        "L206"
+      ],
+      "contexts": [
+        "",
+        "generic_arg",
+        "parameter_type"
+      ]
+    },
+    {
+      "source": "game_possession_sync_controlled_ball",
+      "target": "game_ball_ballstate",
+      "edge_count": 3,
+      "relations": [
+        "references",
+        "uses"
+      ],
+      "source_files": [
+        "game/possession.py"
+      ],
+      "source_locations": [
+        "L88",
+        "L89"
+      ],
+      "contexts": [
+        "",
         "parameter_type",
         "return_type"
       ]
@@ -227,6 +238,58 @@
       "game/config.py"
     ],
     [
+      "game/ball.py",
+      "game/player.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/ball.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/config.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/geometry.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/player.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/possession.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/rebounds.py"
+    ],
+    [
+      "game/ball_contacts.py",
+      "game/rules.py"
+    ],
+    [
+      "game/collisions.py",
+      "game/config.py"
+    ],
+    [
+      "game/collisions.py",
+      "game/geometry.py"
+    ],
+    [
+      "game/collisions.py",
+      "game/player.py"
+    ],
+    [
+      "game/collisions.py",
+      "game/rebounds.py"
+    ],
+    [
+      "game/collisions.py",
+      "game/rules.py"
+    ],
+    [
       "game/player.py",
       "game/actions.py"
     ],
@@ -239,6 +302,30 @@
       "game/stamina.py"
     ],
     [
+      "game/possession.py",
+      "game/ball.py"
+    ],
+    [
+      "game/possession.py",
+      "game/config.py"
+    ],
+    [
+      "game/possession.py",
+      "game/geometry.py"
+    ],
+    [
+      "game/possession.py",
+      "game/player.py"
+    ],
+    [
+      "game/rules.py",
+      "game/config.py"
+    ],
+    [
+      "game/rules.py",
+      "game/player.py"
+    ],
+    [
       "game/simulation.py",
       "game/actions.py"
     ],
@@ -248,11 +335,31 @@
     ],
     [
       "game/simulation.py",
+      "game/ball_contacts.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/collisions.py"
+    ],
+    [
+      "game/simulation.py",
       "game/config.py"
     ],
     [
       "game/simulation.py",
       "game/player.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/possession.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/rebounds.py"
+    ],
+    [
+      "game/simulation.py",
+      "game/rules.py"
     ],
     [
       "game/stamina.py",
@@ -275,6 +382,126 @@
       "game/simulation.py"
     ],
     [
+      "tests/test_ball_contacts.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_ball_contacts.py",
+      "game/ball_contacts.py"
+    ],
+    [
+      "tests/test_ball_contacts.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_ball_contacts.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_ball_contacts.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_collisions.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_collisions.py",
+      "game/collisions.py"
+    ],
+    [
+      "tests/test_collisions.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_collisions.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_collisions.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_kick.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_kick.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_kick.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_kick.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_kick_actions.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_kick_actions.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_kick_actions.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_kick_actions.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/rules.py"
+    ],
+    [
+      "tests/test_physics_contacts.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/possession.py"
+    ],
+    [
+      "tests/test_pickup.py",
+      "game/simulation.py"
+    ],
+    [
       "tests/test_player_controls.py",
       "game/actions.py"
     ],
@@ -297,6 +524,70 @@
     [
       "tests/test_player_motion.py",
       "game/player.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/possession.py"
+    ],
+    [
+      "tests/test_possession.py",
+      "game/simulation.py"
+    ],
+    [
+      "tests/test_rebounds.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_rebounds.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_rebounds.py",
+      "game/rebounds.py"
+    ],
+    [
+      "tests/test_rebounds.py",
+      "game/rules.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/rules.py"
+    ],
+    [
+      "tests/test_rules.py",
+      "game/simulation.py"
     ],
     [
       "tests/test_simulation.py",
@@ -329,6 +620,26 @@
     [
       "tests/test_stamina.py",
       "game/stamina.py"
+    ],
+    [
+      "tests/test_stealing.py",
+      "game/actions.py"
+    ],
+    [
+      "tests/test_stealing.py",
+      "game/ball.py"
+    ],
+    [
+      "tests/test_stealing.py",
+      "game/config.py"
+    ],
+    [
+      "tests/test_stealing.py",
+      "game/player.py"
+    ],
+    [
+      "tests/test_stealing.py",
+      "game/simulation.py"
     ]
   ],
   "import_cycle_method": "Directed Python AST imports between actual local modules, not inferred from the undirected knowledge graph."

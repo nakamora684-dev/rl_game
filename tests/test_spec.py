@@ -1,75 +1,98 @@
-"""
-tests/test_spec.py -- Vérifie la cohérence de environment/spec.py.
-Lancer avec :  python -m pytest tests/test_spec.py    (ou simplement : python tests/test_spec.py)
-"""
-import os
-import sys
+"""Exact hybrid controls; missing optional dependencies are visible skips."""
 
-import numpy as np
+import math
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))  # racine du dépôt
+import pytest
+
+np = pytest.importorskip("numpy", reason="Install the locked environment dependency group.")
+pytest.importorskip("gymnasium", reason="Install the locked environment dependency group.")
 
 from environment import spec
+from game.actions import Direction, PlayerAction
+from game.config import MATCH_TICKS, PHYSICS_HZ, TICKS_PER_DECISION
+
+pytestmark = pytest.mark.environment
 
 
-def test_clock_constants():
-    # 60 Hz / 10 Hz = 6 ticks par décision ; 60 s -> 3600 ticks -> 600 décisions.
-    assert spec.FRAMES_PER_DECISION == 6
-    assert spec.MAX_PHYSICS_TICKS == 3600
+def action(direction=0, effort=0.0, kick=0, power=0.0):
+    return {
+        "direction": int(direction),
+        "effort": np.array([effort], dtype=np.float32),
+        "kick_trigger": kick,
+        "kick_power": np.array([power], dtype=np.float32),
+    }
+
+
+def test_clock_and_dimensions():
+    assert spec.PHYSICS_HZ == PHYSICS_HZ == 60
+    assert spec.FRAMES_PER_DECISION == TICKS_PER_DECISION == 6
+    assert spec.MAX_PHYSICS_TICKS == MATCH_TICKS == 3600
     assert spec.MAX_DECISIONS == 600
-
-
-def test_dimensions():
-    assert spec.ACTION_DIM == 5
-    assert spec.OBS_DIM == 38
+    assert spec.ACTION_DIM == 4 and spec.OBS_DIM == 50
     low, high = spec.obs_bounds()
-    assert low.shape == high.shape == (spec.OBS_DIM,)
+    assert low.shape == high.shape == (50,)
     assert np.all(low < high)
 
 
-def test_decode_action_ranges():
-    rng = np.random.default_rng(0)
-    for _ in range(1000):
-        a = spec.decode_action(rng.uniform(-3, 3, size=5))  # valeurs hors plage -> clippées
-        assert np.hypot(a.move_x, a.move_y) <= 1.0 + 1e-6    # pas de diagonale plus rapide
-        assert 0.0 <= a.effort <= 1.0
-        assert 0.0 <= a.kick_power <= 1.0
+def test_spaces_and_sampled_actions_decode_without_discretizing_effort_or_power():
+    space = spec.make_action_space()
+    space.seed(12)
+    assert space["direction"].n == 9 and space["kick_trigger"].n == 2
+    for _ in range(100):
+        raw = space.sample()
+        result = spec.decode_action(raw)
+        assert isinstance(result, PlayerAction)
+        assert result.direction == Direction(raw["direction"])
+        assert result.effort == float(raw["effort"][0])
+        assert result.kick_power == float(raw["kick_power"][0])
+        assert result.kick_trigger == raw["kick_trigger"]
 
 
-def test_decode_action_extremes():
-    a = spec.decode_action([0, 0, -1, -1, -1])   # tout au minimum
-    assert a.effort == 0.0 and a.kick_power == 0.0 and a.kick is False
-    b = spec.decode_action([1, 1, 1, 1, 1])      # tout au maximum
-    assert b.effort == 1.0 and b.kick is True
-    assert abs(np.hypot(b.move_x, b.move_y) - 1.0) < 1e-6
+@pytest.mark.parametrize("direction", list(Direction))
+def test_horizontal_mirror_matches_direction_vectors_and_is_involutive(direction):
+    original = spec.decode_action(action(direction, 0.25, 1, 0.75))
+    mirrored = spec.policy_to_world(original, -1)
+    x, y = direction.vector
+    assert mirrored.direction.vector == (-x, y)
+    assert (mirrored.effort, mirrored.kick_trigger, mirrored.kick_power) == (0.25, 1, 0.75)
+    assert spec.policy_to_world(mirrored, -1) == original
+    assert spec.policy_to_world(original, 1) == original
 
 
-def test_policy_to_world_flips_x_only():
-    a = spec.decode_action([0.5, 0.3, 0.0, 1.0, 0.0])
-    w = spec.policy_to_world(a, attack_dir=-1)
-    assert w.move_x == -a.move_x and w.move_y == a.move_y and w.kick == a.kick
-    assert spec.policy_to_world(a, attack_dir=1) == a
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("direction", 2.5),
+        ("direction", -1),
+        ("direction", 9),
+        ("direction", True),
+        ("kick_trigger", 0.6),
+        ("kick_trigger", 2),
+        ("effort", [float("nan")]),
+        ("effort", [float("inf")]),
+        ("effort", [-0.01]),
+        ("kick_power", [1.01]),
+        ("effort", 0.5),
+        ("effort", [0.2, 0.4]),
+    ],
+)
+def test_invalid_actions_are_rejected_not_clipped_or_rounded(field, value):
+    raw = action()
+    raw[field] = value
+    with pytest.raises((TypeError, ValueError)):
+        spec.decode_action(raw)
 
 
-def test_symmetry_helpers():
-    # Un joueur à x=200 attaquant vers -x voit x=600 dans le repère de la politique.
-    assert spec.to_policy_x(200.0, -1) == 600.0
-    assert spec.to_policy_x(200.0, +1) == 200.0
-    # Regard vers +x (θ=0) devient regard vers -x (θ=π) après miroir, et inversement.
-    assert np.isclose(spec.to_policy_angle(0.0, -1), np.pi)
+def test_old_five_continuous_values_and_wrong_keys_are_rejected():
+    with pytest.raises(ValueError):
+        spec.decode_action(np.zeros(5, dtype=np.float32))
+    with pytest.raises(ValueError):
+        spec.decode_action({"direction": 0})
 
 
-def test_gymnasium_spaces_if_available():
-    try:
-        import gymnasium  # noqa: F401
-    except ImportError:
-        return  # gymnasium non installé : on saute ce test
-    assert spec.make_action_space().shape == (5,)
-    assert spec.make_observation_space().shape == (spec.OBS_DIM,)
-
-
-if __name__ == "__main__":
-    for name, fn in list(globals().items()):
-        if name.startswith("test_"):
-            fn()
-            print("OK", name)
+def test_idle_zero_power_kick_and_symmetry_helpers():
+    assert spec.decode_action(action()) == PlayerAction()
+    assert spec.decode_action(action(kick=1)).kick_trigger == 1
+    assert spec.decode_action(action(kick=1)).kick_power == 0
+    assert spec.to_policy_x(200, -1) == 600
+    assert spec.to_policy_angle(0, -1) == math.pi

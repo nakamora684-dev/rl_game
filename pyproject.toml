@@ -18,6 +18,11 @@ engine = [
     "pytest>=9.2.0",
     "ruff>=0.17.3",
 ]
+environment = [
+    { include-group = "engine" },
+    "gymnasium>=1.4.0",
+    "numpy>=2.5.4",
+]
 graphify = [
     "graphifyy==0.9.103",
 ]
@@ -32,6 +37,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "full_stack: requires the full project dependencies, not just the engine tools",
+    "environment: tests the Gymnasium adapter, observations, actions, and rewards",
 ]
 
 [tool.ruff]

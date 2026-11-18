@@ -2,24 +2,31 @@
 tests/test_reward.py -- Vérifie environment/reward.py (événements, résultat final, shaping, anti-doublon).
 Lancer :  python tests/test_reward.py     (ou : python -m pytest tests/test_reward.py)
 """
-import os
+
 import random
-import sys
 from dataclasses import replace
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, os.path.dirname(__file__))
+import pytest
+
+pytest.importorskip("numpy", reason="Install the locked environment dependency group.")
 
 from environment import spec
-from environment.contract import BallState, Event, EventType, Phase, StepResult
+from environment.contract import BallState, EventType, Phase, StepResult
+from environment.contract import Event as RewardEvent
+from environment.engine import SimulationEngine
 from environment.reward import COMPONENT_NAMES, RewardCalculator, RewardConfig, potential
-from fake_engine import FakeEngine
+
+pytestmark = pytest.mark.environment
 
 CFG = RewardConfig()
 
 
 def base():
-    return FakeEngine().reset()
+    return SimulationEngine().reset()
+
+
+def Event(kind, tick, player, other=None, event_id=0):
+    return RewardEvent(kind, tick, player, other, event_id)
 
 
 def result_after(prev, events=(), **changes):
@@ -46,7 +53,7 @@ def test_goal_for_and_against():
     p = base()
     goal0 = Event(EventType.GOAL, p.tick + 3, player=0)
     r = result_after(p, [goal0], score=(1, 0))
-    assert reward(p, r, idx=0)[1]["goal_for"] == CFG.goal_for          # +10
+    assert reward(p, r, idx=0)[1]["goal_for"] == CFG.goal_for  # +10
     assert reward(p, r, idx=1)[1]["goal_against"] == CFG.goal_against  # -10 pour l'autre joueur
 
 
@@ -54,9 +61,11 @@ def test_steal_and_loose_ball_recovery_and_steal_lost():
     p = base()
     steal = Event(EventType.STEAL, p.tick + 2, player=0, other=1)
     r = result_after(p, [steal], possession=0)
-    assert reward(p, r, idx=0)[1]["steal"] == CFG.steal                # +1 pour le voleur
-    assert reward(p, r, idx=1)[1]["steal_lost"] == CFG.steal_lost      # la victime est pénalisée une fois
-    assert reward(p, r, idx=1)[1]["steal"] == 0.0                      # et ne reçoit PAS le +1
+    assert reward(p, r, idx=0)[1]["steal"] == CFG.steal  # +1 pour le voleur
+    assert (
+        reward(p, r, idx=1)[1]["steal_lost"] == CFG.steal_lost
+    )  # la victime est pénalisée une fois
+    assert reward(p, r, idx=1)[1]["steal"] == 0.0  # et ne reçoit PAS le +1
 
     rec = Event(EventType.LOOSE_BALL_RECOVERY, p.tick + 2, player=1)
     r2 = result_after(p, [rec], possession=1)
@@ -74,8 +83,8 @@ def test_out_of_bounds_penalizes_only_the_responsible_player():
 def test_deliberate_kick_is_not_penalized():
     p = base()
     p = replace(p, possession=0)
-    kick = Event(EventType.KICK, p.tick + 1, player=0, value=0.8)
-    r = result_after(p, [kick], possession=None)       # le tir libère le ballon
+    kick = Event(EventType.KICK, p.tick, player=0)
+    r = result_after(p, [kick], possession=None)  # le tir libère le ballon
     total, comp = reward(p, r, idx=0)
     assert total == 0.0 and comp["steal_lost"] == 0.0 and comp["out_of_bounds"] == 0.0
 
@@ -83,10 +92,10 @@ def test_deliberate_kick_is_not_penalized():
 def test_final_outcome_win_draw_loss_exactly_once():
     p = replace(base(), tick=spec.MAX_PHYSICS_TICKS - 6)
     for score, expected in (((1, 0), CFG.win), ((0, 0), CFG.draw), ((0, 2), CFG.loss)):
-        r = result_after(p, phase=Phase.ENDED, score=score)
+        r = result_after(p, phase=Phase.FINISHED, score=score)
         assert reward(p, r, idx=0)[1]["outcome"] == expected
     # Après la fin, un pas supplémentaire ne redonne pas le résultat.
-    ended = replace(p, tick=spec.MAX_PHYSICS_TICKS, phase=Phase.ENDED, score=(1, 0))
+    ended = replace(p, tick=spec.MAX_PHYSICS_TICKS, phase=Phase.FINISHED, score=(1, 0))
     r_after = StepResult(state=ended, events=(), ticks_advanced=0)
     assert reward(ended, r_after, idx=0)[1]["outcome"] == 0.0
 
@@ -98,25 +107,38 @@ def test_duplicate_event_is_rejected():
     r = result_after(p, [goal], score=(1, 0))
     calc.compute(p, r, 0)
     try:
-        calc.compute(p, r, 0)          # même événement présenté deux fois
+        calc.compute(p, r, 0)  # même événement présenté deux fois
     except RuntimeError:
         calc.reset()
-        calc.compute(p, r, 0)          # après reset (nouvel épisode) : accepté
+        calc.compute(p, r, 0)  # après reset (nouvel épisode) : accepté
         return
     raise AssertionError("un événement dupliqué aurait dû être refusé")
 
 
 def test_potential_is_attack_normalized():
     s = replace(base(), ball=BallState(600.0, 250.0, 0.0, 0.0))
-    assert potential(s, 0) == 0.75        # le joueur 0 attaque +x : ballon à 600/800
-    assert potential(s, 1) == 0.25        # le joueur 1 attaque -x : même ballon, potentiel opposé
+    assert potential(s, 0) == 0.75  # le joueur 0 attaque +x : ballon à 600/800
+    assert potential(s, 1) == 0.25  # le joueur 1 attaque -x : même ballon, potentiel opposé
+
+
+def test_distinct_same_tick_same_player_recoveries_are_not_false_duplicates():
+    p = base()
+    events = [Event(EventType.LOOSE_BALL_RECOVERY, 1, 0, event_id=i) for i in (0, 1)]
+    assert reward(p, result_after(p, events))[1]["loose_recovery"] == 2 * CFG.loose_recovery
+
+
+def test_unknown_boundary_responsibility_does_not_penalize_either_player():
+    p = base()
+    r = result_after(p, [Event(EventType.OUT_OF_BOUNDS, 1, None)])
+    assert reward(p, r, 0)[1]["out_of_bounds"] == 0
+    assert reward(p, r, 1)[1]["out_of_bounds"] == 0
 
 
 def test_shaping_progress_and_symmetry():
     p = base()
     r = result_after(p, ball=BallState(600.0, 250.0, 0.0, 0.0))
-    assert reward(p, r, idx=0)[1]["progress_shaping"] == CFG.shaping_lambda * 0.25    # +0.5
-    assert reward(p, r, idx=1)[1]["progress_shaping"] == -CFG.shaping_lambda * 0.25   # -0.5
+    assert reward(p, r, idx=0)[1]["progress_shaping"] == CFG.shaping_lambda * 0.25  # +0.5
+    assert reward(p, r, idx=1)[1]["progress_shaping"] == -CFG.shaping_lambda * 0.25  # -0.5
 
 
 def test_shaping_telescopes_so_back_and_forth_farms_nothing():

@@ -1,140 +1,171 @@
-"""
-tests/test_contract.py -- Vérifie le contrat moteur <-> wrapper avec le faux moteur.
-Lancer :  python tests/test_contract.py     (ou : python -m pytest tests/test_contract.py)
+"""The adapter must produce the SAME physics as the shared simulation."""
 
-Quand le Member A aura fini son moteur, il suffira de remplacer FakeEngine par le vrai moteur
-dans `make_engine()` : les mêmes tests s'appliqueront.
-"""
-import os
-import sys
 from dataclasses import replace
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))  # racine du dépôt
-sys.path.insert(0, os.path.dirname(__file__))                      # dossier tests/ (fake_engine)
+import pytest
 
-from environment import spec
 from environment.contract import (
     Event,
     EventType,
     GameEngine,
     Phase,
-    StepResult,
+    snapshot,
     validate_state,
     validate_step_result,
 )
-from fake_engine import FakeEngine
+from environment.engine import SimulationEngine
+from game.actions import PlayerAction
+from game.ball import BallState
+from game.config import MATCH_TICKS, SimulationConfig
+from game.player import PlayerId
+from game.scenarios import ScenarioAgent, build_scenarios
+from game.simulation import assign_possession, reset, step_decision
+
+pytestmark = pytest.mark.environment
+IDLE = (PlayerAction(), PlayerAction())
 
 
-def make_engine():
-    return FakeEngine()   # <- à remplacer par le vrai moteur du Member A
+def test_reset_protocol_orientation_and_no_hidden_history():
+    engine = SimulationEngine()
+    first = engine.reset()
+    assert isinstance(engine, GameEngine)
+    validate_state(first)
+    assert first == engine.reset()
+    assert first.tick == 0 and first.score == (0, 0)
+    swapped = engine.reset(swap_sides=True)
+    assert swapped.attack_dirs == (-1, 1)
+    assert swapped.players[0].x == 600 and swapped.players[1].x == 200
+    assert engine.reset() == first
 
 
-IDLE = spec.decode_action([0, 0, -1, -1, -1])   # action neutre
-ACTIONS = (IDLE, IDLE)
+@pytest.mark.parametrize("scenario", build_scenarios(), ids=lambda s: s.name)
+def test_all_fifty_scenario_initial_decisions_match_shared_engine(scenario):
+    engine = SimulationEngine(scenario.config)
+    previous = engine.reset(initial_state=scenario.initial)
+    a = ScenarioAgent(scenario.plan_a, scenario.initial.simulation_tick)
+    b = ScenarioAgent(scenario.plan_b, scenario.initial.simulation_tick)
+    actions = (a(scenario.initial, PlayerId.A), b(scenario.initial, PlayerId.B))
+    expected = step_decision(scenario.initial, *actions, config=scenario.config)
+    actual = engine.step(actions)
+    assert engine.native_state == expected.state
+    assert actual.state == snapshot(expected.state, scenario.config)
+    assert actual.raw_events == expected.events
+    assert actual.ticks_advanced == expected.physics_ticks
+    validate_step_result(previous, actual)
 
 
-def test_engine_respects_protocol():
-    assert isinstance(make_engine(), GameEngine)
-
-
-def test_reset_is_valid_and_deterministic():
-    e = make_engine()
-    s1 = e.reset(seed=0)
-    s2 = e.reset(seed=0)
-    validate_state(s1)
-    assert s1 == s2                              # même seed => même état
-    assert s1.phase is Phase.PLAYING and s1.tick == 0 and s1.score == (0, 0)
-
-
-def test_attack_dirs_are_kept():
-    e = make_engine()
-    assert e.reset(attack_dirs=(-1, 1)).attack_dirs == (-1, 1)
-
-
-def test_full_match_runs_600_decisions():
-    e = make_engine()
-    state = e.reset(seed=0)
+def test_full_idle_match_is_600_decisions_and_finished_input_is_idempotent():
+    engine = SimulationEngine()
+    state = engine.reset()
     steps = 0
-    all_events = []
     while not state.is_over:
-        result = e.step(ACTIONS)                 # 6 ticks par décision
-        validate_step_result(state, result)      # horloge, fenêtre d'événements, score/GOAL
-        all_events.extend(result.events)
+        result = engine.step(IDLE)
+        validate_step_result(state, result)
         state = result.state
         steps += 1
-    assert steps == spec.MAX_DECISIONS           # 600
-    assert state.tick == spec.MAX_PHYSICS_TICKS  # 3600
-    assert state.phase is Phase.ENDED
+    assert steps == 600 and state.tick == MATCH_TICKS and state.phase is Phase.FINISHED
+    result = engine.step(IDLE)
+    validate_step_result(state, result)
+    assert result.ticks_advanced == 0 and not result.raw_events and not result.events
 
 
-def test_each_scripted_event_occurs_exactly_once():
-    e = make_engine()
-    state = e.reset()
-    events = []
-    while not state.is_over:
-        r = e.step(ACTIONS)
-        events.extend(r.events)
-        state = r.state
-    counts = {t: sum(1 for ev in events if ev.type is t) for t in EventType}
-    assert counts[EventType.GOAL] == 1
-    assert counts[EventType.STEAL] == 1
-    assert counts[EventType.LOOSE_BALL_RECOVERY] == 1
-    assert state.score == (0, 1)
+def test_first_tick_kick_is_valid_and_does_not_retry_after_later_pickup():
+    engine = SimulationEngine()
+    native = assign_possession(reset(), PlayerId.A).state
+    previous = engine.reset(initial_state=native)
+    result = engine.step((PlayerAction(kick_trigger=1, kick_power=1), PlayerAction()))
+    validate_step_result(previous, result)
+    assert [(e.type, e.tick) for e in result.events] == [(EventType.KICK, 0)]
+    assert result.state.players[0].kick_cooldown_ticks == 6
+    assert result.state.players[0].pickup_lockout_ticks == 6
+    # A request while free is discarded, even if A recovers on tick 1.
+    native = replace(reset(), ball=BallState((200, 250)))
+    previous = engine.reset(initial_state=native)
+    result = engine.step((PlayerAction(kick_trigger=1, kick_power=1), PlayerAction()))
+    validate_step_result(previous, result)
+    assert [e.type for e in result.events] == [EventType.LOOSE_BALL_RECOVERY]
+    assert result.state.possession == 0
 
 
-def test_event_in_middle_of_decision_window_is_not_lost():
-    # L'événement du tick 10 tombe au milieu de la 2e décision (ticks 7 à 12).
-    e = make_engine()
-    e.reset()
-    e.step(ACTIONS)                      # ticks 1-6
-    r = e.step(ACTIONS)                  # ticks 7-12
-    assert [ev.tick for ev in r.events] == [10]
+@pytest.mark.parametrize("swap", [False, True])
+def test_goal_uses_scorer_not_last_toucher_and_does_not_skip_restart(swap):
+    engine = SimulationEngine()
+    native = replace(
+        reset(swap_sides=swap),
+        ball=BallState((806.9, 250), (60, 0), last_touch_player=PlayerId.B),
+    )
+    previous = engine.reset(initial_state=native)
+    result = engine.step(IDLE)
+    validate_step_result(previous, result)
+    assert result.state.tick == 6 and result.state.restart_ticks_remaining == 55
+    assert result.state.phase is Phase.GOAL_RESTART
+    assert result.events[0].player == (1 if swap else 0)
+    assert result.raw_events[0].last_touch_player is PlayerId.B
 
 
-def test_validate_step_result_catches_bad_clock():
-    e = make_engine()
-    s0 = e.reset()
-    r = e.step(ACTIONS)
-    bad = StepResult(state=r.state, events=r.events, ticks_advanced=r.ticks_advanced + 1)
-    try:
-        validate_step_result(s0, bad)
-    except ValueError:
-        return
-    raise AssertionError("une horloge incohérente aurait dû être détectée")
+def test_neutral_boundary_is_unblamed_and_neutral_restart_is_not_recovery():
+    engine = SimulationEngine()
+    previous = engine.reset(initial_state=replace(reset(), ball=BallState((400, -6.9), (0, -60))))
+    result = engine.step(IDLE)
+    validate_step_result(previous, result)
+    assert result.events[0].type is EventType.OUT_OF_BOUNDS
+    assert result.events[0].player is None
+    events = list(result.events)
+    raw = list(result.raw_events)
+    for _ in range(10):
+        result = engine.step(IDLE)
+        events.extend(result.events)
+        raw.extend(result.raw_events)
+    assert [e.type for e in events] == [EventType.OUT_OF_BOUNDS]
+    assert any(e.cause == "neutral_restart" for e in raw)
 
 
-def test_validate_step_result_catches_goal_mismatch():
-    # Un événement GOAL sans variation de score doit être rejeté (protège contre les doubles récompenses).
-    e = make_engine()
-    s0 = e.reset()
-    r = e.step(ACTIONS)
-    fake_goal = Event(EventType.GOAL, tick=3, player=0)
-    bad = StepResult(state=r.state, events=r.events + (fake_goal,), ticks_advanced=r.ticks_advanced)
-    try:
-        validate_step_result(s0, bad)
-    except ValueError:
-        return
-    raise AssertionError("un GOAL sans changement de score aurait dû être détecté")
+def test_partial_final_decision_keeps_goal_and_terminal_events():
+    engine = SimulationEngine()
+    native = replace(
+        reset(),
+        simulation_tick=MATCH_TICKS - 1,
+        ball=BallState((806.9, 250), (60, 0), last_touch_player=PlayerId.A),
+    )
+    previous = engine.reset(initial_state=native)
+    result = engine.step(IDLE)
+    validate_step_result(previous, result)
+    assert result.ticks_advanced == 1 and result.state.is_over
+    assert [e.kind for e in result.raw_events] == ["goal", "match_finished"]
 
 
-def test_validate_state_catches_invalid_states():
-    s = make_engine().reset()
+def test_event_ids_do_not_collide_at_adjacent_decision_boundary():
+    engine = SimulationEngine()
+    # Contact occurs on completed tick 6; the next decision can kick at stamp 6.
+    native = replace(reset(), ball=BallState((251, 250), (-300, 0)))
+    engine.reset(initial_state=native)
+    one = engine.step((PlayerAction(kick_trigger=1), PlayerAction()))
+    two = engine.step((PlayerAction(kick_trigger=1), PlayerAction()))
+    assert [(e.type, e.tick) for e in one.events] == [(EventType.LOOSE_BALL_RECOVERY, 6)]
+    assert [(e.type, e.tick) for e in two.events] == [(EventType.KICK, 6)]
+    assert two.events[0].event_id > one.events[0].event_id
+    validate_step_result(one.state, two)
+
+
+def test_validator_rejects_bad_clock_score_window_and_duplicate_ids():
+    engine = SimulationEngine()
+    prev = engine.reset()
+    result = engine.step(IDLE)
+    goal = Event(EventType.GOAL, 3, 0, None, 0)
     for bad in (
-        replace(s, possession=2),
-        replace(s, attack_dirs=(1, 1)),
-        replace(s, score=(-1, 0)),
-        replace(s, players=(replace(s.players[0], stamina=150.0), s.players[1])),
-        replace(s, players=(replace(s.players[0], x=float("nan")), s.players[1])),
+        replace(result, ticks_advanced=5),
+        replace(result, events=(goal,)),
+        replace(result, events=(replace(goal, tick=0),)),
+        replace(result, events=(Event(EventType.KICK, 0, 0, None, 0),) * 2),
     ):
-        try:
-            validate_state(bad)
-        except ValueError:
-            continue
-        raise AssertionError(f"état invalide non détecté : {bad}")
+        with pytest.raises(ValueError):
+            validate_step_result(prev, bad)
 
 
-if __name__ == "__main__":
-    for name, fn in list(globals().items()):
-        if name.startswith("test_"):
-            fn()
-            print("OK", name)
+def test_adapter_guards_reset_and_action_types():
+    engine = SimulationEngine(SimulationConfig())
+    with pytest.raises(RuntimeError):
+        engine.step(IDLE)
+    engine.reset()
+    with pytest.raises(TypeError):
+        engine.step((object(), PlayerAction()))

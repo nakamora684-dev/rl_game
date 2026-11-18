@@ -402,3 +402,32 @@ is absent or undecided. The student authorized implementation and retained kick-
   changes. Snapshot sweeps/settling remain approximate; visual/integration/throughput
   validation is not established by passing this catalog. See `docs/next_session.md`
   for executed check results and next work.
+
+## 21. Approved real-engine environment compatibility (17 Nov)
+
+- The student authorized adapting Member C's environment, retaining exact hybrid
+  controls, updating observation timers/phase, and preserving experimental rewards.
+  `game/` physics is unchanged. `environment/engine.py::SimulationEngine` owns native
+  state and delegates to `step_decision`; projections never simulate physics.
+- Actions are now a Gymnasium Dict: direction `Discrete(9)`, effort `Box(0,1,(1,))`,
+  kick trigger `Discrete(2)`, power `Box(0,1,(1,))`. Only policy actions are mirrored;
+  opponents use the native runner provider contract/world-space `PlayerAction`.
+  Standard SB3 PPO still needs a separately agreed C/D mixed-action integration.
+- Observation version 2 has 50 features: the original first 35, actual contest and
+  protection, both players' kick/pickup timers, four phases, countdown and restart
+  receiver. Actual config drives geometry/player-speed/timer normalization. The
+  receiver is decision-relevant state, not exposure of last-touch bookkeeping.
+- Opponents are queried every decision, including restarts; no fast-forward or
+  retries of rejected kicks. Original event order/timestamps and complete collision/
+  constraint/limit telemetry are preserved. Reward events use scorer versus last
+  toucher correctly, allow unknown boundary blame, and distinguish setup/restarts/
+  post loss from genuine steals/recoveries. Unique episode-local event IDs avoid
+  false duplicate detection for multiple real same-tick transitions.
+- C's reward weights/shaping settings remain experimental and unchanged; exploit
+  validation, shaping discount/terminal conventions, logging and PPO are not solved.
+  Old five-value actions/38-feature checkpoints are incompatible; notify B/C/D before
+  using this new interface. See `docs/environment.md` for the full handoff.
+- The student approved the locked `environment` dependency group (existing NumPy/
+  Gymnasium requirements plus engine tools). Use `uv sync --locked --only-group
+  environment` and matching `uv run` flags. Missing optional test dependencies must
+  be visible skips, never silent passes. No renderer, baseline or training changes.

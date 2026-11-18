@@ -24,7 +24,9 @@ is documented in the root README; no manual global package installation is requi
 
 Locked-player and goalpost rebounds now share the simulation core. A headless match
 runner is implemented; no renderer, Gymnasium wrapper or PPO encoding is implemented
-here. Visual validation, adapter integration, tuning and further numerical hardening remain.
+inside `game/`. The real-engine Gymnasium adapter now lives in `environment/`; see
+[its version-2 contract and C/D handoff](environment.md). PPO action integration,
+visual validation, tuning and further numerical hardening remain.
 
 ## Coordinates and units
 

@@ -9,6 +9,7 @@ DÉCISIONS (à valider avec le Member D) :
   * `truncated = True` seulement comme filet de sécurité si le moteur ne termine jamais le match
     (plus de MAX_DECISIONS pas).
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -18,8 +19,8 @@ from environment.spec import MAX_DECISIONS
 
 
 class EndReason(Enum):
-    NONE = "none"                        # épisode en cours
-    TIME_UP = "time_up"                  # coup de sifflet final
+    NONE = "none"  # épisode en cours
+    TIME_UP = "time_up"  # coup de sifflet final
     SAFETY_TRUNCATION = "safety_truncation"  # filet de sécurité (bug du moteur probable)
 
 

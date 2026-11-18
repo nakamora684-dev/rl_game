@@ -1,71 +1,49 @@
+"""Read-only projections of the real engine, not a second physics specification.
+
+Player indices 0/1 mean stable identities A/B, independently of attacking side.
+The authoritative state and complete event stream remain in game.simulation.
 """
-environment/contract.py  --  Contrat entre le moteur (game/, Member A) et le wrapper (environment/, Member C)
 
-Ce fichier ne contient AUCUNE physique. Il définit seulement :
-  * ce que le moteur doit EXPOSER (snapshots d'état en lecture seule),
-  * quels ÉVÉNEMENTS il doit remonter (chacun une seule fois),
-  * quelle INTERFACE il doit offrir (reset / step),
-  * des fonctions de VALIDATION que le wrapper et les tests utilisent.
-
-Le Member A implémente `GameEngine` dans game/. Le wrapper (P4) ne dépend que de ce contrat,
-jamais des détails internes du moteur (et jamais de Pygame).
-
-Conventions (à faire confirmer par le Member A) :
-  * Repère MONDE : x dans [0, PITCH_W], y dans [0, PITCH_H], unités logiques.
-  * Angles en radians, facing = atan2(dy, dx) dans le repère monde.
-  * Joueurs indexés 0 et 1. Le joueur 0 commence à gauche (200,250), le joueur 1 à droite (600,250).
-  * attack_dirs[i] = +1 si le joueur i attaque vers +x, -1 s'il attaque vers -x.
-  * Les actions reçues par le moteur sont en repère MONDE (déjà passées par policy_to_world).
-"""
-from __future__ import annotations
-
-import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Protocol, runtime_checkable
+from math import isfinite
+from typing import Protocol, runtime_checkable
 
-from environment.spec import (
-    FRAMES_PER_DECISION,
-    MAX_PHYSICS_TICKS,
-    PITCH_H,
-    PITCH_W,
-    DecodedAction,
-)
+from game.actions import PlayerAction
+from game.config import MATCH_TICKS, TICKS_PER_DECISION, SimulationConfig
+from game.player import PlayerId
+from game.simulation import MatchPhase, SimulationEvent, SimulationState
 
-# ---------------------------------------------------------------------------
-# 1. PHASES ET ÉVÉNEMENTS
-# ---------------------------------------------------------------------------
+Phase = MatchPhase
+PLAYER_IDS = (PlayerId.A, PlayerId.B)
 
 
-class Phase(Enum):
-    """Phase du match. Une seule source de vérité (pas de drapeaux séparés)."""
-    PLAYING = "playing"   # jeu normal : la politique décide
-    RESTART = "restart"   # remise en jeu (après but ou sortie) : pas de décision
-    ENDED = "ended"       # match terminé (60 s écoulées)
+def player_index(player: PlayerId | None) -> int | None:
+    return None if player is None else PLAYER_IDS.index(player)
 
 
 class EventType(Enum):
-    """Événements ponctuels. Le moteur en émet UN SEUL par occurrence réelle."""
-    GOAL = "goal"                              # player = marqueur
-    STEAL = "steal"                            # player = voleur, other = victime
-    LOOSE_BALL_RECOVERY = "loose_ball_recovery"  # player = celui qui reprend un ballon libre
-    OUT_OF_BOUNDS = "out_of_bounds"            # player = responsable (dernier toucheur)
-    KICK = "kick"                              # player = tireur, value = puissance du tir [0,1]
+    GOAL = "goal"
+    STEAL = "steal"
+    LOOSE_BALL_RECOVERY = "loose_ball_recovery"
+    OUT_OF_BOUNDS = "out_of_bounds"
+    KICK = "kick"
 
 
 @dataclass(frozen=True)
 class Event:
-    """Un événement daté. `tick` est le tick physique où il s'est produit."""
+    """Reward-relevant classification; id is unique within one adapter episode.
+
+    tick keeps the original engine stamp. A kick uses its pre-integration tick;
+    goals/acquisitions use the completed tick. id, NOT (type, tick, player),
+    distinguishes multiple real transitions within a bounded multi-impact tick.
+    """
+
     type: EventType
     tick: int
-    player: int                  # joueur principal (voir EventType pour le sens exact)
-    other: Optional[int] = None  # joueur secondaire (ex. victime d'un vol)
-    value: float = 0.0           # valeur annexe (ex. puissance d'un tir)
-
-
-# ---------------------------------------------------------------------------
-# 2. SNAPSHOTS D'ÉTAT (lecture seule)
-# ---------------------------------------------------------------------------
+    player: int | None
+    other: int | None
+    event_id: int
 
 
 @dataclass(frozen=True)
@@ -74,152 +52,171 @@ class PlayerState:
     y: float
     vx: float
     vy: float
-    facing: float   # radians, repère monde
-    stamina: float  # [0, 100]
+    facing: float
+    stamina: float
+    kick_cooldown_ticks: int = 0
+    pickup_lockout_ticks: int = 0
 
 
 @dataclass(frozen=True)
 class BallState:
     x: float
     y: float
-    vx: float       # le moteur peut mettre 0 quand le ballon est attaché ; le wrapper ne s'y fie pas
+    vx: float
     vy: float
 
 
 @dataclass(frozen=True)
 class MatchState:
-    """Photographie complète du match à un instant donné."""
-    tick: int                                   # horloge unique : ticks physiques écoulés
+    tick: int
     players: tuple[PlayerState, PlayerState]
     ball: BallState
-    possession: Optional[int]                   # None (libre), 0 ou 1 : UN SEUL propriétaire
-    last_toucher: Optional[int]                 # dernier joueur ayant touché le ballon
-    score: tuple[int, int]                      # (buts du joueur 0, buts du joueur 1)
-    attack_dirs: tuple[int, int]                # (+1, -1) ou (-1, +1)
+    possession: int | None
+    last_toucher: int | None
+    score: tuple[int, int]
+    attack_dirs: tuple[int, int]
     phase: Phase
-    contest_progress: tuple[float, float]       # secondes de contact accumulées par le joueur i qui tente un vol
-    steal_cooldown: tuple[float, float]         # secondes restantes avant que le joueur i puisse revoler
+    steal_progress_ticks: int
+    possession_protection_ticks: int
+    restart_ticks_remaining: int
+    restart_owner: int | None
+    config: SimulationConfig
 
     @property
     def ticks_remaining(self) -> int:
-        return max(0, MAX_PHYSICS_TICKS - self.tick)
+        return max(0, MATCH_TICKS - self.tick)
 
     @property
     def time_remaining_frac(self) -> float:
-        """Fraction de temps restant dans [0, 1] (1 = début du match)."""
-        return self.ticks_remaining / MAX_PHYSICS_TICKS
+        return self.ticks_remaining / MATCH_TICKS
 
     @property
     def is_over(self) -> bool:
-        return self.phase is Phase.ENDED or self.tick >= MAX_PHYSICS_TICKS
+        return self.phase is Phase.FINISHED
+
+
+def snapshot(state: SimulationState, config: SimulationConfig) -> MatchState:
+    """Project, never integrate or mutate, a shared immutable simulation state."""
+    players = tuple(
+        PlayerState(
+            *p.position,
+            *p.velocity,
+            p.facing,
+            p.stamina,
+            p.kick_cooldown_ticks,
+            p.pickup_lockout_ticks,
+        )
+        for p in (state.player_a, state.player_b)
+    )
+    return MatchState(
+        tick=state.simulation_tick,
+        players=players,
+        ball=BallState(*state.ball.position, *state.ball.velocity),
+        possession=player_index(state.ball.possession_owner),
+        last_toucher=player_index(state.ball.last_touch_player),
+        score=(state.score_a, state.score_b),
+        attack_dirs=(state.attack_direction_a, state.attack_direction_b),
+        phase=state.phase,
+        steal_progress_ticks=state.steal_progress_ticks,
+        possession_protection_ticks=state.possession_protection_ticks,
+        restart_ticks_remaining=state.restart_ticks_remaining,
+        restart_owner=player_index(state.restart_plan.owner) if state.restart_plan else None,
+        config=config,
+    )
 
 
 @dataclass(frozen=True)
 class StepResult:
-    """Ce que le moteur renvoie après avoir avancé de `ticks_advanced` ticks."""
     state: MatchState
-    events: tuple[Event, ...]   # TOUS les événements survenus pendant ces ticks, dans l'ordre
-    ticks_advanced: int         # peut être < n_ticks si le match se termine en cours de route
-
-
-# ---------------------------------------------------------------------------
-# 3. INTERFACE DU MOTEUR (à implémenter par le Member A)
-# ---------------------------------------------------------------------------
+    events: tuple[Event, ...]
+    ticks_advanced: int
+    raw_events: tuple[SimulationEvent, ...] = ()
 
 
 @runtime_checkable
 class GameEngine(Protocol):
-    """
-    Ce que le wrapper attend du moteur.
+    config: SimulationConfig
 
-    Règles du contrat :
-      1. reset() est DÉTERMINISTE : même seed + mêmes attack_dirs => même état initial.
-      2. step() avance de n_ticks ticks physiques en TENANT les deux actions constantes.
-      3. Les phases RESTART sont résolues À L'INTÉRIEUR de step() : l'état renvoyé est PLAYING ou ENDED.
-         (Hypothèse par défaut : la politique ne décide pas pendant une remise en jeu.)
-      4. Chaque événement est émis UNE SEULE fois, avec son tick exact (même s'il survient au tick 3 sur 6).
-      5. Le moteur ne dépend jamais de Pygame ni des récompenses.
-    """
+    @property
+    def native_state(self) -> SimulationState: ...
 
     def reset(
-        self,
-        seed: Optional[int] = None,
-        attack_dirs: tuple[int, int] = (1, -1),
-    ) -> MatchState:
-        ...
+        self, *, swap_sides: bool = False, initial_state: SimulationState | None = None
+    ) -> MatchState: ...
 
-    def step(
-        self,
-        actions: tuple[DecodedAction, DecodedAction],
-        n_ticks: int = FRAMES_PER_DECISION,
-    ) -> StepResult:
-        ...
-
-
-# ---------------------------------------------------------------------------
-# 4. VALIDATIONS (utilisées par les tests et, en mode debug, par le wrapper)
-# ---------------------------------------------------------------------------
-
-
-def _finite(*values: float) -> bool:
-    return all(math.isfinite(v) for v in values)
+    def step(self, actions: tuple[PlayerAction, PlayerAction]) -> StepResult: ...
 
 
 def validate_state(s: MatchState) -> None:
-    """Lève ValueError si le snapshot est incohérent."""
-    if s.tick < 0:
-        raise ValueError(f"tick négatif : {s.tick}")
-    for i, p in enumerate(s.players):
-        if not _finite(p.x, p.y, p.vx, p.vy, p.facing, p.stamina):
-            raise ValueError(f"joueur {i} : valeur non finie")
-        if not (0.0 <= p.x <= PITCH_W and 0.0 <= p.y <= PITCH_H):
-            raise ValueError(f"joueur {i} hors du terrain : ({p.x}, {p.y})")
-        if not (0.0 <= p.stamina <= 100.0):
-            raise ValueError(f"joueur {i} : stamina hors [0,100] : {p.stamina}")
-    if not _finite(s.ball.x, s.ball.y, s.ball.vx, s.ball.vy):
-        raise ValueError("ballon : valeur non finie")
-    if s.possession not in (None, 0, 1):
-        raise ValueError(f"possession invalide : {s.possession}")
-    if s.last_toucher not in (None, 0, 1):
-        raise ValueError(f"last_toucher invalide : {s.last_toucher}")
-    if s.attack_dirs not in ((1, -1), (-1, 1)):
-        raise ValueError(f"attack_dirs invalide : {s.attack_dirs}")
-    if min(s.score) < 0:
-        raise ValueError(f"score négatif : {s.score}")
-    if min(s.contest_progress) < 0 or min(s.steal_cooldown) < 0:
-        raise ValueError("minuteur de duel/cooldown négatif")
+    if type(s.tick) is not int or not 0 <= s.tick <= MATCH_TICKS:
+        raise ValueError("Tick must be an integer within the match duration.")
+    if len(s.players) != 2 or s.attack_dirs not in ((1, -1), (-1, 1)):
+        raise ValueError("Expected two players with opposing attack directions.")
+    if not isinstance(s.phase, Phase) or s.is_over != (s.tick == MATCH_TICKS):
+        raise ValueError("Finished phase must coincide with the final match tick.")
+    pitch = s.config.pitch
+    timers = [s.steal_progress_ticks, s.possession_protection_ticks, s.restart_ticks_remaining]
+    for p in s.players:
+        if not all(isfinite(v) for v in (p.x, p.y, p.vx, p.vy, p.facing, p.stamina)):
+            raise ValueError("Nonfinite player state.")
+        if not (0 <= p.x <= pitch.width and 0 <= p.y <= pitch.height):
+            raise ValueError("Player outside pitch.")
+        if not 0 <= p.stamina <= 100:
+            raise ValueError("Stamina outside [0,100].")
+        timers.extend((p.kick_cooldown_ticks, p.pickup_lockout_ticks))
+    if not all(isfinite(v) for v in (s.ball.x, s.ball.y, s.ball.vx, s.ball.vy)):
+        raise ValueError("Nonfinite ball state.")
+    for owner in (s.possession, s.last_toucher, s.restart_owner):
+        if owner is not None and (type(owner) is not int or owner not in (0, 1)):
+            raise ValueError("Invalid player index.")
+    if len(s.score) != 2 or any(type(v) is not int or v < 0 for v in s.score):
+        raise ValueError("Invalid score.")
+    if any(type(t) is not int or t < 0 for t in timers):
+        raise ValueError("Timers must be nonnegative integer ticks.")
+    if s.possession is None and (s.steal_progress_ticks or s.possession_protection_ticks):
+        raise ValueError("Free ball cannot have contest/protection timers.")
+    if s.possession is not None and (
+        s.last_toucher != s.possession or s.ball.vx != 0 or s.ball.vy != 0
+    ):
+        raise ValueError("Controlled ball must have matching last touch and zero free velocity.")
+    restarting = s.phase in (Phase.GOAL_RESTART, Phase.OUT_OF_BOUNDS_RESTART)
+    if restarting != (s.restart_ticks_remaining > 0):
+        raise ValueError("Restart phase and countdown disagree.")
+    if not restarting and s.restart_owner is not None:
+        raise ValueError("Restart owner outside restart phase.")
 
 
 def validate_step_result(prev: MatchState, result: StepResult) -> None:
-    """
-    Vérifie la cohérence entre deux états successifs (protège contre les récompenses en double) :
-      * l'horloge avance exactement de ticks_advanced,
-      * chaque événement est daté dans la fenêtre (prev.tick, new.tick],
-      * les événements sont triés par tick,
-      * le nombre d'événements GOAL de chaque joueur = variation de son score.
+    """Keep original event order; stamps are not all on the same side of a tick.
+
+    A tick's completion event at t+1 can precede the next tick's kick at t+1.
+    We allow that tie, but only kicks may use the window's initial tick.
     """
     new = result.state
     validate_state(new)
-
-    if new.tick != prev.tick + result.ticks_advanced:
-        raise ValueError(
-            f"horloge incohérente : {prev.tick} + {result.ticks_advanced} != {new.tick}"
-        )
-
-    last_tick = prev.tick
+    expected = min(TICKS_PER_DECISION, prev.ticks_remaining)
+    if type(result.ticks_advanced) is not int or result.ticks_advanced != expected:
+        raise ValueError("A decision must advance six ticks, or the remaining terminal ticks.")
+    if new.tick != prev.tick + result.ticks_advanced or new.config != prev.config:
+        raise ValueError("Inconsistent clock or config.")
+    last_tick, ids = prev.tick, set()
     for e in result.events:
-        if not (prev.tick < e.tick <= new.tick):
-            raise ValueError(f"événement hors fenêtre : {e}")
-        if e.tick < last_tick:
-            raise ValueError("événements non triés par tick")
+        valid_tick = (
+            prev.tick <= e.tick < new.tick
+            if e.type is EventType.KICK
+            else prev.tick < e.tick <= new.tick
+        )
+        if not valid_tick or e.tick < last_tick:
+            raise ValueError("Event outside its engine timestamp window or out of order.")
         last_tick = e.tick
-        if e.player not in (0, 1):
-            raise ValueError(f"événement avec joueur invalide : {e}")
-
+        if e.player not in (0, 1) and not (e.type is EventType.OUT_OF_BOUNDS and e.player is None):
+            raise ValueError("Invalid event player.")
+        if e.other not in (None, 0, 1):
+            raise ValueError("Invalid secondary player.")
+        if type(e.event_id) is not int or e.event_id < 0 or e.event_id in ids:
+            raise ValueError("Invalid or duplicate event id.")
+        ids.add(e.event_id)
     for i in (0, 1):
-        goals = sum(1 for e in result.events if e.type is EventType.GOAL and e.player == i)
+        goals = sum(e.type is EventType.GOAL and e.player == i for e in result.events)
         if goals != new.score[i] - prev.score[i]:
-            raise ValueError(
-                f"joueur {i} : {goals} événements GOAL mais le score a varié de "
-                f"{new.score[i] - prev.score[i]}"
-            )
+            raise ValueError("Goal events disagree with score change.")

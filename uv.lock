@@ -2600,6 +2600,12 @@ engine = [
     { name = "pytest" },
     { name = "ruff" },
 ]
+environment = [
+    { name = "gymnasium" },
+    { name = "numpy" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
 graphify = [
     { name = "graphifyy" },
 ]
@@ -2624,6 +2630,12 @@ dev = [
     { name = "ruff", specifier = ">=0.17.3" },
 ]
 engine = [
+    { name = "pytest", specifier = ">=9.2.0" },
+    { name = "ruff", specifier = ">=0.17.3" },
+]
+environment = [
+    { name = "gymnasium", specifier = ">=1.4.0" },
+    { name = "numpy", specifier = ">=2.5.4" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.3" },
 ]

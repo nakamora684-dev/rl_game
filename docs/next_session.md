@@ -1,4 +1,44 @@
-# Next session: full-match runner
+# Next session: hybrid PPO handoff and visual integration
+
+> **Latest: Member C environment compatibility (17 Nov).** The student approved
+> preserving exact hybrid controls, updating observations, retaining experimental
+> reward settings and adding a locked lightweight `environment` dependency group.
+> `FootballEnv()` now uses the real shared engine through `SimulationEngine`;
+> `game/` physics is unchanged. Restarts remain visible six-tick decisions, native
+> opponents use the runner provider contract, event stamps/telemetry are preserved,
+> and reward classification excludes setup/restart/post-loss acquisitions.
+>
+> **Breaking C/D interface:** mixed Dict actions (discrete direction/kick plus
+> continuous effort/power) and observation version 2 with 50 features. Standard
+> SB3 PPO still cannot consume these controls directly. Coordinate its mixed-action
+> distribution/encoding with C/D rather than silently discretizing movement effort
+> or power. `docs/environment.md` records usage, feature order, reward caveats and
+> tests. No renderer, proper baseline, PPO, training/logging or tuning was added.
+> The previous runner/physics notes below are historical; current source and this
+> latest handoff supersede statements that the wrapper is unimplemented.
+
+### Environment compatibility verification (17 Nov 2026)
+
+```powershell
+uv sync --locked --only-group environment
+uv run --locked --only-group environment pytest -m "not full_stack" -q
+# 692 passed, 1 deselected, 36 subtests passed
+uv run --locked --only-group environment ruff check game environment tests
+# All checks passed
+uv run --locked --only-group environment ruff format --check game environment tests
+# 51 files already formatted
+uv lock --check
+# 179 packages resolved; lock consistent
+```
+
+Also executed `uv sync --locked --only-group engine` to actually remove NumPy/
+Gymnasium, then `uv run --locked --only-group engine pytest -m "not full_stack" -q`:
+**622 passed, 4 skipped, 1 deselected, 36 subtests passed**. The four dependency-needing
+test modules are explicit skips; the stdlib adapter/contract tests still run. Restored
+the locked `environment` group afterwards. `git diff --name-only -- game train.py
+test.py play.py observe.py agents rendering` is empty: no physics or teammate
+entry-point/controller/renderer edits. The full-stack dependency smoke test remains
+excluded, and no trained-policy, visual, throughput or reward-exploit claim is made.
 
 > **Latest: runner-audit repairs (17 Nov).** The student requested fixes using the
 > scenario report. Restart-event last touch now comes from the resulting ball;

@@ -67,11 +67,27 @@ while match time continues. `--contacts` isolates locked-player/post rebounds, c
 post loss and post→goal in one tick; it is not a full-match runner. Ball normal restitution
 is 0.5 off pickup-locked players (no recoil) and 0.7 off radius-4 posts; eligible players
 still trap. Bounded multi-contact processing emits collision/constraint/limit telemetry.
-The core still has no renderer/RL wrapper or full-match runner; default strict-clearance
-goals intentionally require kicks. Snapshot sweeps are not an exact rigid-body solver;
+The shared core has a headless full-match runner, and `environment/` now wraps that
+same simulation for Gymnasium; no renderer or PPO action integration exists yet.
+Default strict-clearance goals intentionally require kicks. Snapshot sweeps are not an exact rigid-body solver;
 visual validation and tuning remain. See [the next-session handoff](docs/next_session.md).
 The `full_stack` dependency-import test is intentionally excluded from engine-only runs.
 Use `--only-group engine` on `uv run` too: omitting it can install the full project stack.
+
+### Members A/C: lightweight real-engine environment tests
+
+```powershell
+uv sync --locked --only-group environment
+uv run --locked --only-group environment pytest -m "not full_stack" -q
+uv run --locked --only-group environment ruff check game environment tests
+uv run --locked --only-group environment ruff format --check game environment tests
+```
+
+This adds only NumPy/Gymnasium to the engine tools, not Torch/Pygame/SB3. Engine-only
+runs visibly skip optional-dependency tests. See [the environment handoff](docs/environment.md)
+for usage, exact hybrid actions, the new 50-feature observation and restart/event rules.
+**Standard SB3 PPO cannot directly use this mixed Dict action space**; its C/D
+integration remains separate. Experimental reward settings were preserved, not finalized.
 
 ### Full team environment
 This also installs rendering, training, notebook, and evaluation dependencies (including PyTorch).

@@ -138,16 +138,31 @@ changes (use `/graphify . --update` for an incremental skill refresh). A bare CL
 design documents. No cloud upload, paid API key, or Git hooks are needed for this setup.
 Only share reviewable outputs you want in Git; local caches/previews are ignored.
 
-## Planned entry points (currently scaffold files)
-- `uv run python play.py`      – human-playable game vs the rule-based baseline (Member B, implemented)
-- `uv run python observe.py`   – watch baseline vs baseline, or `--headless --episodes N --swap` (Member B, implemented)
-- `uv run python train.py`     – train PPO (headless)
-- `uv run python test.py`      – evaluate RL vs baseline → results/*.csv
-- `uv run jupyter lab`         – open evaluate.ipynb
+## Entry points
+- `uv run python play.py`      – human-playable game vs the rule-based baseline (Member B)
+- `uv run python observe.py`   – watch baseline vs baseline, a trained PPO agent (`--p0 ppo --model models/<run>/best.pt`), or `--headless --episodes N --swap` (B + D)
+- `uv run python train.py`     – train PPO (headless) → `logs/<run>/`, `models/<run>/` (Member D)
+- `uv run python test.py`      – evaluate agents vs the baseline → `results/eval_*.csv` + summary (Member D)
+- `uv run jupyter lab`         – open `evaluate.ipynb`
 
 ## Member B: graphical mode and rule-based baseline
 See [docs/B_integration.md](docs/B_integration.md): `agents/engine_adapter.py` is the 60 Hz bridge used by the
 renderer, and `agents/provider.py` exposes the baseline as a native `ActionProvider` for `FootballEnv(opponent=...)`.
+
+## Member D: training and evaluation
+Standard SB3 PPO cannot use the hybrid Dict action space, so `agents/ppo.py` is a custom PyTorch PPO
+with a custom group-wise residual actor-critic (`agents/networks.py`). Full guide, design decisions and
+open items: [docs/training.md](docs/training.md).
+
+```powershell
+uv sync --locked
+uv run --locked pytest tests/test_d_*.py -q
+uv run python train.py --run-name smoke --opponent rule_based --total-timesteps 20000 --n-envs 4
+uv run tensorboard --logdir logs
+uv run python test.py --agents models/smoke/best.pt random idle heuristic --opponent rule_based --matches 20
+uv run python observe.py --p0 ppo --model models/smoke/best.pt --p1 rule
+```
+Opponents: `rule_based` (B's baseline, normal), `rule_based_easy`, `rule_based_hard`; `chaser` is a temporary stand-in.
 
 ## Structure
 See project plan, section 10. Current engine API, tuning, and limitations: [docs/engine.md](docs/engine.md).

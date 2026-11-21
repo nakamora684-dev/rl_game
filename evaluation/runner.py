@@ -24,7 +24,10 @@ def play_match(policy, env, *, seed: int, agent_idx: int, swap_sides: bool, meta
     recorder = MatchRecorder(agent_idx, env.engine.config)
     while True:
         prev = env._state  # read-only MatchState projection of the shared engine
-        action = np.asarray(policy.act(obs), dtype=np.float32)
+        native = getattr(policy, "act_native", None)  # e.g. the rule-based baseline as agent
+        raw = (native(env.engine.native_state, agent_idx, prev.attack_dirs[agent_idx])
+               if native else policy.act(obs))
+        action = np.asarray(raw, dtype=np.float32)
         obs, _, terminated, truncated, info = env.step(to_env_action(action))
         recorder.observe(prev, action, info, env._state)
         if terminated or truncated:

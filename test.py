@@ -23,7 +23,7 @@ from agents.opponents import OPPONENT_NAMES
 from evaluation.metrics import MATCH_COLUMNS, summarize
 from evaluation.policies import load_policy
 from evaluation.runner import evaluate
-from training.vec_env import EnvSpec
+from training.vec_env import EnvSpec, parse_reward_overrides
 
 HELD_OUT_SEED_BASE = 1_000_000  # training seeds are < 100_000 (see train.py)
 
@@ -31,7 +31,8 @@ HELD_OUT_SEED_BASE = 1_000_000  # training seeds are < 100_000 (see train.py)
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     p.add_argument("--agents", nargs="+", required=True,
-                   help="checkpoint paths and/or reference agents: 'random', 'idle', 'heuristic'")
+                   help="checkpoint paths and/or reference agents: 'random', 'idle', 'heuristic', "
+                        "'rule_based' / 'rule_based_easy' / 'rule_based_hard' (B's baseline as agent)")
     p.add_argument("--opponent", default="rule_based", choices=OPPONENT_NAMES)
     p.add_argument("--matches", type=int, default=100, help="matches per agent (use multiples of 4)")
     p.add_argument("--seed-base", type=int, default=HELD_OUT_SEED_BASE)
@@ -39,6 +40,8 @@ def parse_args(argv=None):
                    help="stochastic samples actions (matches differ); deterministic uses the mode")
     p.add_argument("--start-jitter", type=float, default=0.0,
                    help="+-units of seeded start-position jitter (0 = engine's fixed start)")
+    p.add_argument("--reward", nargs="*", default=[], metavar="NAME=VALUE",
+                   help="reward overrides (only changes the logged ep_return/r_* columns)")
     p.add_argument("--out", default=None, help="CSV path (default results/eval_<time>.csv)")
     p.add_argument("--device", default="cpu")
     return p.parse_args(argv)
@@ -48,7 +51,8 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     if args.seed_base < 100_000:
         print("WARNING: seed-base overlaps the training seed range; not held-out.", file=sys.stderr)
-    spec = EnvSpec(opponent=args.opponent, start_jitter=args.start_jitter, randomize_sides=False)
+    spec = EnvSpec(opponent=args.opponent, start_jitter=args.start_jitter, randomize_sides=False,
+                   reward_overrides=parse_reward_overrides(args.reward))
     deterministic = args.policy_mode == "deterministic"
     if deterministic and args.start_jitter == 0:
         print("WARNING: deterministic policy + deterministic engine/opponent + no start jitter "

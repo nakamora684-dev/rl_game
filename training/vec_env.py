@@ -31,6 +31,20 @@ class EnvSpec:
     reward_overrides: dict = field(default_factory=dict)
 
 
+def parse_reward_overrides(items) -> dict:
+    """['steal=0', 'loose_recovery=0'] -> {'steal': 0.0, ...}; names are validated."""
+    from dataclasses import fields
+
+    valid = {f.name: f.type for f in fields(RewardConfig)}
+    out: dict = {}
+    for item in items or []:
+        name, sep, value = item.partition("=")
+        if not sep or name not in valid:
+            raise ValueError(f"bad --reward item {item!r}; use name=value with name in {sorted(valid)}")
+        out[name] = (value.lower() == "true") if name == "zero_terminal_potential" else float(value)
+    return out
+
+
 def build_env(spec: EnvSpec, seed: int = 0) -> FootballEnv:
     engine = JitteredSimulationEngine(jitter=spec.start_jitter, seed=seed)
     reward_cfg = RewardConfig(**spec.reward_overrides) if spec.reward_overrides else None

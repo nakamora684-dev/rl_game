@@ -75,3 +75,21 @@ so always in [0,1] and never clipped/rejected by the env). Effort's log-prob cou
    read-only accessor would be cleaner.
 4. **Everyone** — fill in "Machine specs" in the README after the first benchmark; measure steps/second
    (`perf/steps_per_sec` in TensorBoard) before choosing `--total-timesteps`.
+
+## Reward exploit found in exp0 (steal / loose-ball loop)
+
+Observed in `observe.py`: the trained agent steals, immediately kicks the ball away, the baseline
+recovers the loose ball, and the agent steals again (event log: `Steal BLUE -> Kick BLUE -> Loose ball
+won RED`, repeated within a second). In `environment/reward.py` a steal pays +1, a kick costs nothing
+and the opponent's recovery costs the agent nothing, so each cycle nets about +1 (plan section 5,
+probe 1). Rising return with no goals is the signature.
+
+Experiment-1 setting (remove the farmable terms; goals, outcome, progress shaping and the steal-lost
+penalty stay):
+
+    uv run python train.py --run-name exp1 --opponent rule_based --n-envs 8 --n-workers 4 --start-jitter 25 --reward steal=0 loose_recovery=0
+
+Do NOT resume exp0 (the policy has learned the loop). Evaluate exp1 with the same `--reward` flags only
+if you want comparable `ep_return` columns; outcome metrics are unaffected by reward settings. If a
+steal bonus is wanted later, pair it with a penalty for losing the ball right after (Member C).
+`test.py --agents rule_based rule_based_hard ...` evaluates Member B's baseline as an agent in the same CSV.

@@ -13,6 +13,7 @@ from training.vec_env import EnvRunner, EnvSpec, VecFootball
 
 pytestmark = pytest.mark.environment
 SPEC = EnvSpec(opponent="chaser", randomize_sides=False)
+SPEC_RB = EnvSpec(opponent="rule_based", randomize_sides=False)
 
 
 def test_idle_agent_rows_match_schema_and_are_consistent():
@@ -75,3 +76,20 @@ def test_env_runner_randomizes_sides_with_seed():
     for _ in range(3):
         a.reset(), b.reset()
         assert a.env._agent_idx == b.env._agent_idx
+
+
+def test_rule_based_can_be_evaluated_as_the_agent():
+    rows = evaluate(load_policy("rule_based"), SPEC_RB, n_matches=4, seed_base=1_000_000,
+                    agent_name="rule_based", policy_mode="stochastic")
+    assert len(rows) == 4 and all(list(r) == MATCH_COLUMNS for r in rows)
+    assert {r["attack_dir"] for r in rows} == {1, -1}
+    assert all(r["decisions"] == 600 and r["kick_attempts"] >= 0 for r in rows)
+
+
+def test_reward_override_parsing():
+    from training.vec_env import parse_reward_overrides
+
+    assert parse_reward_overrides(["steal=0", "loose_recovery=0.25"]) == {
+        "steal": 0.0, "loose_recovery": 0.25}
+    with pytest.raises(ValueError):
+        parse_reward_overrides(["nonsense=1"])

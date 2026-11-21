@@ -31,7 +31,7 @@ from agents.opponents import OPPONENT_NAMES
 from agents.ppo import PPOConfig, PPOTrainer, load_checkpoint, resolve_device
 from evaluation.runner import quick_eval_fn
 from training.logger import TrainingLogger
-from training.vec_env import EnvSpec, VecFootball
+from training.vec_env import EnvSpec, VecFootball, parse_reward_overrides
 
 DEFAULT_CONFIG = Path("configs/ppo_default.json")
 TRAIN_SEED_LIMIT = 100_000  # evaluation seeds start at 500_000 (periodic) / 1_000_000 (test.py)
@@ -69,6 +69,9 @@ def parse_args(argv=None):
     p.add_argument("--shaping-gamma", type=float, default=None,
                    help="override the env's potential-shaping gamma (default: env's own 1.0). "
                         "Decide with Member C whether to align it with --gamma.")
+    p.add_argument("--reward", nargs="*", default=[], metavar="NAME=VALUE",
+                   help="override RewardConfig fields, e.g. --reward steal=0 loose_recovery=0 "
+                        "(see environment/reward.py)")
     p.add_argument("--eval-every", type=int, default=20, help="PPO updates between evaluations")
     p.add_argument("--eval-matches", type=int, default=8, help="matches per periodic evaluation")
     p.add_argument("--save-every", type=int, default=20, help="PPO updates between ckpt_*.pt")
@@ -91,7 +94,9 @@ def main(argv=None) -> int:
     torch.manual_seed(ppo_cfg.seed)
     device = resolve_device(ppo_cfg.device)
 
-    overrides = {} if args.shaping_gamma is None else {"shaping_gamma": args.shaping_gamma}
+    overrides = parse_reward_overrides(args.reward)
+    if args.shaping_gamma is not None:
+        overrides["shaping_gamma"] = args.shaping_gamma
     spec = EnvSpec(opponent=args.opponent, start_jitter=args.start_jitter,
                    randomize_sides=not args.no_randomize_sides, reward_overrides=overrides)
     eval_spec = EnvSpec(opponent=args.opponent, start_jitter=args.start_jitter,

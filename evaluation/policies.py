@@ -63,6 +63,38 @@ class HeuristicPolicy:
         return np.array([direction_towards(dx, dy), 0.7, 0.0, 0.0], dtype=np.float32)
 
 
+class ProviderPolicy:
+    """Member B's rule-based baseline playing as the evaluated AGENT.
+
+    It reads the native engine state (like it does as an opponent) and its WORLD-space
+    action is converted to the policy-frame flat action the env expects, so the same
+    recorder/CSV/plots cover it. Same physics, same 10 Hz decisions as every other agent.
+    """
+
+    def __init__(self, name: str) -> None:
+        from agents.opponents import make_opponent
+
+        self.name = name
+        self.provider = make_opponent(name)
+
+    def reseed(self, seed: int) -> None:
+        if hasattr(self.provider, "reset"):
+            self.provider.reset()
+
+    def act(self, obs: np.ndarray) -> np.ndarray:  # pragma: no cover - needs native state
+        raise RuntimeError("ProviderPolicy needs act_native()")
+
+    def act_native(self, state, agent_idx: int, attack_dir: int) -> np.ndarray:
+        from environment.spec import policy_to_world
+        from game.player import PlayerId
+
+        world = self.provider(state, PlayerId.A if agent_idx == 0 else PlayerId.B)
+        a = policy_to_world(world, attack_dir)  # horizontal mirror is its own inverse
+        return np.array(
+            [int(a.direction), a.effort, float(a.kick_trigger), a.kick_power], dtype=np.float32
+        )
+
+
 class TorchPolicy:
     def __init__(self, model, name: str, deterministic: bool, device="cpu") -> None:
         self.model, self.name, self.deterministic, self.device = model, name, deterministic, device
@@ -82,13 +114,15 @@ class TorchPolicy:
 
 
 def load_policy(spec: str, deterministic: bool = False, device: str = "cpu"):
-    """``spec`` is 'random', 'idle', 'heuristic', or a checkpoint path (name = parent/stem)."""
+    """``spec`` is 'random', 'idle', 'heuristic', 'rule_based[_easy|_hard]', or a checkpoint path (name = parent/stem)."""
     if spec == "random":
         return RandomPolicy()
     if spec == "idle":
         return IdlePolicy()
     if spec == "heuristic":
         return HeuristicPolicy()
+    if spec.startswith("rule_based"):
+        return ProviderPolicy(spec)
     path = Path(spec)
     if not path.is_file():
         raise FileNotFoundError(f"Agent {spec!r} is not 'random', 'idle', 'heuristic' or a checkpoint file.")
